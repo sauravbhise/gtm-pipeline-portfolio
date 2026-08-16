@@ -1,0 +1,11 @@
+# secrets
+.env
+*.pem
+*credentials*
+
+# OS
+.DS_Store
+
+# editor
+.vscode/
+.idea/
