@@ -1,0 +1,525 @@
+{
+  "name": "Current Business & Process",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Current Business & Process",
+        "formDescription": "Some fields have been pre-filled with our best guess — feel free to update them.\nQuestions marked \u2b50 matter most to us — please give those a little extra thought.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Who currently owns business development day-to-day?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Director"
+                  },
+                  {
+                    "option": "Dedicated BD Lead"
+                  },
+                  {
+                    "option": "A small team"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "If Other, please specify",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Is there any tool currently used to track leads or customers?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Dedicated CRM"
+                  },
+                  {
+                    "option": "Spreadsheet"
+                  },
+                  {
+                    "option": "Nothing formal yet"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "How are quotes currently generated and sent?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Manual (Excel/Word)"
+                  },
+                  {
+                    "option": "Semi-automated"
+                  },
+                  {
+                    "option": "Dedicated software"
+                  },
+                  {
+                    "option": "Ad hoc, no fixed process"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "How are customer communications currently logged/tracked?",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Email"
+                  },
+                  {
+                    "option": "WhatsApp Business"
+                  },
+                  {
+                    "option": "Phone (unlogged)"
+                  },
+                  {
+                    "option": "CRM notes"
+                  },
+                  {
+                    "option": "Not tracked formally"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Any other digital presence beyond your website?",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Company LinkedIn page"
+                  },
+                  {
+                    "option": "IndiaMART"
+                  },
+                  {
+                    "option": "TradeIndia"
+                  },
+                  {
+                    "option": "Justdial"
+                  },
+                  {
+                    "option": "None of these"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "How do new prospects usually find you?",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Referrals"
+                  },
+                  {
+                    "option": "RFQs & tenders"
+                  },
+                  {
+                    "option": "Distributors"
+                  },
+                  {
+                    "option": "Trade shows"
+                  },
+                  {
+                    "option": "Cold outreach"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Roughly how many new inquiries/RFQs come in per month?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "0-5"
+                  },
+                  {
+                    "option": "5-15"
+                  },
+                  {
+                    "option": "15-30"
+                  },
+                  {
+                    "option": "30+"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Roughly what share of those convert into an order?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Under 10%"
+                  },
+                  {
+                    "option": "10-25%"
+                  },
+                  {
+                    "option": "25-50%"
+                  },
+                  {
+                    "option": "Over 50%"
+                  },
+                  {
+                    "option": "Not sure"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Roughly how many active leads/opportunities are in your pipeline at any time?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Under 10"
+                  },
+                  {
+                    "option": "10-25"
+                  },
+                  {
+                    "option": "25-50"
+                  },
+                  {
+                    "option": "50+"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Typical sales cycle length, first contact to signed order?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Under 1 month"
+                  },
+                  {
+                    "option": "1-3 months"
+                  },
+                  {
+                    "option": "3-6 months"
+                  },
+                  {
+                    "option": "6+ months"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "What's typically required during the sales process?",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Formal quote"
+                  },
+                  {
+                    "option": "Physical samples"
+                  },
+                  {
+                    "option": "Capability deck"
+                  },
+                  {
+                    "option": "Facility audit"
+                  },
+                  {
+                    "option": "Reference checks"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "What's your pricing model?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Per-piece"
+                  },
+                  {
+                    "option": "Tooling-inclusive"
+                  },
+                  {
+                    "option": "Cost-plus"
+                  },
+                  {
+                    "option": "Market-rate"
+                  },
+                  {
+                    "option": "Mixed"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Typical payment terms offered?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Net 30"
+                  },
+                  {
+                    "option": "Net 45"
+                  },
+                  {
+                    "option": "Net 60"
+                  },
+                  {
+                    "option": "Net 90"
+                  },
+                  {
+                    "option": "Varies by customer"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Any pricing flexibility for large/strategic accounts?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Yes, regularly"
+                  },
+                  {
+                    "option": "Case-by-case"
+                  },
+                  {
+                    "option": "Rarely"
+                  },
+                  {
+                    "option": "No"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "\u2b50 Walk me through what typically happens from a new company's first inquiry through to a signed order.",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Roughly what share of revenue comes from your top 2-3 customers?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Under 25%"
+                  },
+                  {
+                    "option": "25-50%"
+                  },
+                  {
+                    "option": "50-75%"
+                  },
+                  {
+                    "option": "Over 75%"
+                  }
+                ]
+              },
+              "defaultValue": "50-75%",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Who typically makes the final decision on the customer's side?",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Procurement"
+                  },
+                  {
+                    "option": "Engineering"
+                  },
+                  {
+                    "option": "Plant head"
+                  },
+                  {
+                    "option": "Owner/founder"
+                  },
+                  {
+                    "option": "Committee"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "How price-sensitive are your typical customers?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Very price-sensitive"
+                  },
+                  {
+                    "option": "Moderately price-sensitive"
+                  },
+                  {
+                    "option": "Prioritize quality & reliability over price"
+                  },
+                  {
+                    "option": "Varies by customer"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Roughly how does revenue split across industries you serve? (as a %)",
+              "fieldType": "textarea",
+              "defaultValue": "White goods, Automotive, Off-road vehicles, Furniture",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Are there customer segments you deliberately avoid? (optional)",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "What's your biggest edge over competitors?",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Price"
+                  },
+                  {
+                    "option": "Quality"
+                  },
+                  {
+                    "option": "Turnaround time"
+                  },
+                  {
+                    "option": "Certifications"
+                  },
+                  {
+                    "option": "Existing relationships"
+                  },
+                  {
+                    "option": "Location"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Who are your 3-5 biggest competitors?",
+              "fieldType": "textarea",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Is there anything they do noticeably better than you?",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Price"
+                  },
+                  {
+                    "option": "Speed"
+                  },
+                  {
+                    "option": "Quality"
+                  },
+                  {
+                    "option": "Relationships"
+                  },
+                  {
+                    "option": "Nothing significant"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Any recent deals lost — to whom, and why, if known? (optional)",
+              "fieldType": "textarea",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "How do you think the industry perceives your company? (optional)",
+              "fieldType": "textarea",
+              "requiredField": false
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Submit"
+        }
+      },
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        250,
+        300
+      ],
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "webhookId": "atharva-intake-ch2-business-process"
+    }
+  ],
+  "connections": {},
+  "pinData": {},
+  "meta": {
+    "instanceId": "placeholder"
+  }
+}

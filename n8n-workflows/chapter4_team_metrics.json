@@ -1,0 +1,167 @@
+{
+  "name": "Team & Metrics",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Team & Metrics",
+        "formDescription": "Last chapter — just a few questions about the team and how success is tracked.\nQuestions marked \u2b50 matter most to us — please give those a little extra thought.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Who is the primary decision-maker for BD/sales strategy?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Director"
+                  },
+                  {
+                    "option": "Dedicated BD Lead"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "If other, please specify",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Are there any KPIs or targets currently tracked for sales/BD?",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Revenue growth"
+                  },
+                  {
+                    "option": "New customer count"
+                  },
+                  {
+                    "option": "Conversion rate"
+                  },
+                  {
+                    "option": "None currently"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "How comfortable is the team with adopting new digital tools day-to-day?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Very comfortable"
+                  },
+                  {
+                    "option": "Somewhat comfortable"
+                  },
+                  {
+                    "option": "Not very comfortable"
+                  },
+                  {
+                    "option": "Resistant"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Have you tried a CRM or similar digital tool before that didn't stick?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Yes, and it stuck"
+                  },
+                  {
+                    "option": "Yes, but didn't stick"
+                  },
+                  {
+                    "option": "Never tried"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "If it didn't stick, what happened? (optional)",
+              "fieldType": "textarea",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "\u2b50 Once something like this is built, who would actually use/operate it day-to-day?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Owner"
+                  },
+                  {
+                    "option": "A dedicated BD person"
+                  },
+                  {
+                    "option": "Someone else"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "If someone else, please specify",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "\u2b50 How open is the team to a more systematic, automated approach vs. staying relationship/instinct-driven?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Fully embrace a structured approach"
+                  },
+                  {
+                    "option": "Open, but cautious"
+                  },
+                  {
+                    "option": "Prefer to keep it relationship/instinct-driven"
+                  },
+                  {
+                    "option": "Not sure"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Submit"
+        }
+      },
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        250,
+        300
+      ],
+      "id": "a1b2c3d4-0004-4000-8000-000000000004",
+      "webhookId": "atharva-intake-ch4-team-metrics"
+    }
+  ],
+  "connections": {},
+  "pinData": {},
+  "meta": {
+    "instanceId": "placeholder"
+  }
+}

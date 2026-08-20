@@ -1,0 +1,242 @@
+{
+  "name": "Aspirations & Relationship Management",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Aspirations & Relationship Management",
+        "formDescription": "This is the chapter we're most excited to hear your thoughts on — where you want to take the business next.\nQuestions marked \u2b50 matter most to us — please give those a little extra thought.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "How often do you check in with existing customers?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Monthly"
+                  },
+                  {
+                    "option": "Quarterly"
+                  },
+                  {
+                    "option": "Annually"
+                  },
+                  {
+                    "option": "No set cadence"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "How do you currently stay in touch with existing customers?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Regular scheduled visits/calls"
+                  },
+                  {
+                    "option": "As-needed only"
+                  },
+                  {
+                    "option": "Mostly transactional"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Have you tried offering existing customers more product lines or capacity?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Yes, works well"
+                  },
+                  {
+                    "option": "Yes, mixed results"
+                  },
+                  {
+                    "option": "Haven't tried"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "If tried, what happened? (optional)",
+              "fieldType": "textarea",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Do inquiries or leads ever fall through the cracks?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Rarely"
+                  },
+                  {
+                    "option": "Sometimes"
+                  },
+                  {
+                    "option": "Often"
+                  },
+                  {
+                    "option": "Not sure"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "\u2b50 What are the recurring reasons you tend to lose deals?",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Price"
+                  },
+                  {
+                    "option": "Speed"
+                  },
+                  {
+                    "option": "Certification/compliance gap"
+                  },
+                  {
+                    "option": "Trust/relationship"
+                  },
+                  {
+                    "option": "Quality concerns"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "If Other, please specify",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "\u2b50 What's the single biggest bottleneck slowing down new customer acquisition today?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Not enough leads coming in"
+                  },
+                  {
+                    "option": "Slow quote turnaround"
+                  },
+                  {
+                    "option": "Losing RFQs to competitors"
+                  },
+                  {
+                    "option": "No time for proactive outreach"
+                  },
+                  {
+                    "option": "No system to track follow-ups"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "What feels like the most wasted time in your current process? (optional)",
+              "fieldType": "textarea",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "\u2b50 In your own words, what does your ideal customer look like?",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Are there specific companies you'd love to work with but haven't broken into yet?",
+              "fieldType": "textarea",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Any new industries or geographies you're hoping to expand into?",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Automotive"
+                  },
+                  {
+                    "option": "Consumer Appliances"
+                  },
+                  {
+                    "option": "Electricals & Electronics"
+                  },
+                  {
+                    "option": "HVAC"
+                  },
+                  {
+                    "option": "Furniture"
+                  },
+                  {
+                    "option": "Medical"
+                  },
+                  {
+                    "option": "Industrial Equipment"
+                  },
+                  {
+                    "option": "Aerospace & Defense"
+                  },
+                  {
+                    "option": "Renewable Energy"
+                  },
+                  {
+                    "option": "New export markets"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "If new export markets or Other, please specify",
+              "fieldType": "text",
+              "requiredField": false
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Submit"
+        }
+      },
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        250,
+        300
+      ],
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "webhookId": "atharva-intake-ch3-aspirations"
+    }
+  ],
+  "connections": {},
+  "pinData": {},
+  "meta": {
+    "instanceId": "placeholder"
+  }
+}

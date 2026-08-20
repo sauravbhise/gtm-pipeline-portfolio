@@ -1,0 +1,342 @@
+{
+  "name": "Capabilities & Certifications",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Capabilities & Certifications",
+        "formDescription": "Please take a few mins to let us know about your current capabilities.\nSome fields have been pre-filled with publicly available information — feel free to update them.\nQuestions marked \u2b50 matter most to us — please give those a little extra thought.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Facility size & locations",
+              "fieldType": "textarea",
+              "defaultValue": "3 plants\n Pune/Ranjangaon (64,560 sq ft, flagship),\n Vasai (25,000 sq ft),\n Bavla, Gujarat (50,000 sq ft).",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Machine Inventory",
+              "fieldType": "textarea",
+              "defaultValue": "45+ machines total (18 Pune, 6 Vasai, 21 Bavla)\n Tonnage 80T-500T.",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Materials & Gauge Range",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "GL/GPSP"
+                  },
+                  {
+                    "option": "Aluminium (0.25-2mm) / aluminium-coated steel"
+                  },
+                  {
+                    "option": "HR/CR steel (up to 16mm)"
+                  },
+                  {
+                    "option": "SS304/SS430 (up to 2mm)"
+                  },
+                  {
+                    "option": "ERW pipes (OD 25-82mm / up to 5mm thick)"
+                  }
+                ]
+              },
+              "defaultValue": "GL/GPSP,Aluminium (0.25-2mm) / aluminium-coated steel,HR/CR steel (up to 16mm),SS304/SS430 (up to 2mm),ERW pipes (OD 25-82mm / up to 5mm thick)"
+            },
+            {
+              "fieldLabel": "Others (if any)",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Additional in-house capabilities",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Welding (Manual & Robotic)"
+                  },
+                  {
+                    "option": "CNC Tube bending/squeezing/flaring"
+                  },
+                  {
+                    "option": "Tool Room"
+                  },
+                  {
+                    "option": "Designing (SolidWorks/AutoCAD)"
+                  }
+                ]
+              },
+              "defaultValue": "Welding (Manual & Robotic),CNC Tube bending/squeezing/flaring,Tool Room,Designing (SolidWorks/AutoCAD)"
+            },
+            {
+              "fieldLabel": "Others (if any)",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Current total workforce count (On Payroll)",
+              "fieldType": "number",
+              "defaultValue": "48",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Current total workforce count (incl. contract/shop-floor staff)",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "50-100"
+                  },
+                  {
+                    "option": "101-250"
+                  },
+                  {
+                    "option": "251-500"
+                  },
+                  {
+                    "option": "500+"
+                  }
+                ]
+              },
+              "defaultValue": "251-500",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Monthly production capacity",
+              "fieldType": "text",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "\u2b50 Current Capacity Utilization",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Running near-max"
+                  },
+                  {
+                    "option": "Some headroom"
+                  },
+                  {
+                    "option": "Significant headroom"
+                  },
+                  {
+                    "option": "Not sure"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Typical lead time from confirmed order to delivery?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Under 2 weeks"
+                  },
+                  {
+                    "option": "2-4 weeks"
+                  },
+                  {
+                    "option": "4-8 weeks"
+                  },
+                  {
+                    "option": "8+ weeks"
+                  },
+                  {
+                    "option": "Varies significantly by order"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Is it still accurate that your tool room handles maintenance/manufacturing while tool design goes through an external partner?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Yes, still accurate"
+                  },
+                  {
+                    "option": "No, this has changed"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "If that's changed, what's different now? (leave blank if still accurate)",
+              "fieldType": "textarea",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Do you have a minimum order quantity?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Yes, fixed MOQ"
+                  },
+                  {
+                    "option": "Varies by customer/product"
+                  },
+                  {
+                    "option": "No MOQ"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "If yes, what's the typical MOQ? (leave blank if not applicable)",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Quality Certifications",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "IATF 16949:2016"
+                  },
+                  {
+                    "option": "ISO 9001:2015"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Others (if any)",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Any certifications currently in progress or being considered?",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "ISO 14001 (Environmental)"
+                  },
+                  {
+                    "option": "OHSAS/ISO 45001 (Safety)"
+                  },
+                  {
+                    "option": "Additional customer-specific approvals"
+                  },
+                  {
+                    "option": "None currently"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "If Other, please specify",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Specialized or differentiating equipment",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "FARO Arm & CMM metrology"
+                  },
+                  {
+                    "option": "Robotic welding lines"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "defaultValue": "FARO Arm & CMM metrology,Robotic welding lines"
+            },
+            {
+              "fieldLabel": "If Other, please specify",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Do you currently export?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Yes, currently exporting"
+                  },
+                  {
+                    "option": "No"
+                  },
+                  {
+                    "option": "Planning to"
+                  }
+                ]
+              },
+              "defaultValue": "Yes, currently exporting",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "If exporting, any specific export/import compliance certifications held?",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Not sure / need to confirm"
+                  },
+                  {
+                    "option": "AEO (Authorized Economic Operator)"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              },
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "If Other, please specify",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Are there customers you hold formal vendor-approved status with?",
+              "fieldType": "textarea",
+              "defaultValue": "Haier, Blue Star, Versuni/Philips, Toro, Haworth, Atomberg, Belrise, Duroshox, Hikoki",
+              "requiredField": false
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Submit"
+        }
+      },
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        250,
+        300
+      ],
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "webhookId": "atharva-intake-ch1-capabilities"
+    }
+  ],
+  "connections": {},
+  "pinData": {},
+  "meta": {
+    "instanceId": "placeholder"
+  }
+}
