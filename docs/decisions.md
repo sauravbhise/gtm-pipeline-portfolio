@@ -171,6 +171,34 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
  
 ---
  
+## 2026-08-21 — Apollo.io added as a Clay data provider (not part of original stack)
+ 
+**Decision:** Using Apollo.io as the underlying data provider for Clay's "Find people at company by job title" enrichment action, on Apollo's free tier, authenticated via a separate API key.
+ 
+**Why this wasn't planned upfront:** The original tool stack (n8n + Clay + LLM API + HubSpot, decided 2026-08-16) named Clay as the enrichment layer without specifying which of Clay's many underlying data-provider integrations would actually power each enrichment column. Apollo only surfaced once building the real Key Contact column and comparing Clay's available people-search actions — it wasn't a deliberated stack choice, it's an implementation detail one level down from "use Clay."
+ 
+**Why Apollo specifically:** Of the people-search options surfaced in Clay's enrichment picker, it was the one built for the actual need — filtering people at a given company by job title (Procurement Manager, Sourcing Head, Supply Chain Manager, VP Operations, Plant Head) — rather than a generic contact-list pull requiring manual filtering afterward.
+ 
+**Cost:** Free tier, no credit card required. Free-tier credit limits are inconsistently reported across sources and not worth treating as precisely known — irrelevant at the current ~11-row shortlist scale regardless of the exact cap. Requires its own API key separate from Clay's own credit balance.
+ 
+**Worth noting for future reuse:** if this pipeline is ever pointed at a different company/ICP, Apollo access (or its free-tier limits) will need re-verifying — this wasn't a stack decision made with the same scrutiny as the original four tools, just the option that fit the immediate need when building the actual column.
+ 
+---
+ 
+## 2026-08-24 — Apollo hit a paid-tier wall; pivoted to Clay-native "Find Contacts at Company"
+ 
+**Decision:** Replaced the Apollo.io-backed "Find people at company by job title" enrichment column with Clay's own native "Find Contacts at Company" action (~0.5 credits/row), after Apollo's free tier proved unable to run the actual search.
+ 
+**What happened:** Signed up for Apollo free tier and connected it to Clay via API key, per the 2026-08-21 decision. Running it against the Clay table failed with an explicit error: the specific endpoint Clay's integration calls (`api/v1/mixed_people/api_search`) is not included in the Free plan and requires a paid upgrade. This was a real risk flagged at signup time ("free-tier credit limits are inconsistently reported... worth checking Apollo's own pricing page") — it materialized as a hard capability wall rather than a credit-limit squeeze.
+ 
+**Why not upgrade Apollo instead:** Checked current Apollo pricing before deciding — sources disagreed on whether full People Search API access starts at the Professional tier (~$79-99/month) or is gated to Organization (~$119-149/month, 3-5 seat minimum), which is itself a signal this is a moving/unclear target not worth paying into speculatively. Paying $50-150+/month to unblock one enrichment column on a project that's otherwise run entirely on free tiers didn't make sense, especially with a genuinely capable free alternative already sitting inside Clay.
+ 
+**Fix:** Switched to Clay's own native "Find Contacts at Company" action — same underlying goal (title/seniority-filtered contact search per company), but priced against Clay's existing credit balance instead of requiring a separate paid account. Rebuilt the same 7-persona title/seniority/location filter set using Clay's native filter fields (Job Title, Seniority, Job Functions, Location) rather than Apollo's equivalent, and dropped the Company Attributes block entirely since company identity is already fixed per-row in this table (that filter block is meant for open-market search, not row-level enrichment). Tested on the same 3 rows as every other column (Switch Mobility, Tork Motors, Carrier Midea) before running across the full shortlist — confirmed working.
+ 
+**Worth noting:** This is a second entry in the pattern started with Apollo on 2026-08-21 — a specific data-provider choice made while building, not a top-level stack decision, now reversed once real usage revealed it didn't fit the project's free-tier constraint. The Apollo account and persona-filter research from the broader market-exploration side-project (separate from the Clay shortlist enrichment) remains a valid, working setup on its own — this pivot only affects the Clay-embedded, row-level contact search.
+ 
+---
+ 
 ## 2026-08-16 — Time estimate: build vs. buy (infra vs. questionnaire tool)
  
 **Decision:** Treat the questionnaire delivery and the VM/pipeline infra as two independently-paced tracks rather than one bundled effort.
