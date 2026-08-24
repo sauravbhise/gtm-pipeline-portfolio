@@ -199,6 +199,22 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
  
 ---
  
+## 2026-08-24 — Clay enrichment pipeline complete: Fit Score, Find Contacts, Email Waterfall
+ 
+**Decision:** Locked the full Clay-side enrichment chain for the prospecting table: Company Search (ICP-filtered) → AI Fit Score → Find Contacts at Company → Email Waterfall. All four stages tested on a small sample before running across the full list, consistent with the testing discipline used throughout the project.
+ 
+**Fit Score:** Built as a Clay AI column using GPT-4.1 mini (lowest-cost option at 1 credit/row). Tested against known strong/weak fits (Hindware, Carrier Midea vs. Mivi, PEI-Genesis) before trusting it — confirmed real score discrimination (30-93 range) rather than a model defaulting to a safe middle score. Prompt built from a factual Atharva capability description (materials, tonnage, certifications, current customers) plus the "strategic growth partner" framing surfaced from real BDE intake answers ("when he grows, we grow") — this reframing came *after* initial scoring and is a documented follow-up, not yet re-run into the scores as of this entry.
+ 
+**Find Contacts at Company:** Originally attempted via Apollo (logged separately, 2026-08-24), hit a paid-tier API wall, pivoted to Clay's own native action. Configured against the 7-persona title/seniority/department filter set developed collaboratively (Procurement, Sourcing/Supply Chain, Operations Director, Plant Head, VP/Head of Manufacturing, Quality Assurance, Design Engineering/NPD) — the Engineering-track persona was added specifically after the BDE's real answer that Procurement *and* Engineering jointly own the final decision, correcting an initial persona set that under-weighted Engineering.
+ 
+**Email Waterfall:** 3-provider chain — Findymail (highest accuracy, first position) → Prospeo/Datagma (second) → Hunter (broadest net, final fallback) — deliberately avoiding another BYOK/separate-account dependency after the Apollo lesson; all three run on Clay's native credit balance. Order followed the general "cost control via early cheap/high-coverage provider" principle rather than a fixed accuracy-only ranking, since a full waterfall's cost is dominated by how many rows survive to the more expensive later steps, not the sticker price of any one provider.
+ 
+**Credit budget checkpoint:** ~1,900 of ~2,005 starting data credits remain after Company Search (2 passes, ~20 rows total), Fit Score (20 rows), Find Contacts, and Email Waterfall (~11-row shortlist). Comfortably within the free trial allocation — no cost pressure to change approach for the remainder of this capstone's Clay usage.
+ 
+**Still open:** the Fit Score prompt has not yet been re-run with the "strategic growth partner" reframing from the BDE's actual answers — current scores reflect pure capability-matching only. Worth revisiting before treating the current ≥80 shortlist as final.
+ 
+---
+ 
 ## 2026-08-16 — Time estimate: build vs. buy (infra vs. questionnaire tool)
  
 **Decision:** Treat the questionnaire delivery and the VM/pipeline infra as two independently-paced tracks rather than one bundled effort.
