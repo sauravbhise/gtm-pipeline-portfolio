@@ -1,0 +1,494 @@
+{
+  "name": "GTM Outreach - Personalization Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fce82f8f-8d23-48ab-90d1-28c263c81515",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -384,
+        16
+      ],
+      "id": "ebb5ebc9-0e60-40f8-88b1-ff577147b478",
+      "name": "Webhook",
+      "webhookId": "fce82f8f-8d23-48ab-90d1-28c263c81515",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://172.21.192.1:11434/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"phi4-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are drafting a short, personalized cold outreach opener on behalf of Atharva Metals & Engineering, a Pune-based IATF 16949:2016-certified sheet metal stamping manufacturer (45+ presses, 80T-500T, serving OEMs like Haier, Blue Star, Versuni/Philips, Toro, and Haworth across appliances, automotive, and off-road vehicle categories). Write 2-3 sentences that: reference something specific and true about the target company from the fit rationale provided; connect it to a concrete Atharva capability, not a generic pitch; end with a soft, low-pressure call to action such as a brief call, not 'buy now'; avoid superlatives, hype, or generic phrases like 'we'd love to explore synergies'.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Target company: {{ $json.body.company_name }}\\nDomain: {{ $json.body.domain }}\\nFit rationale: {{ $json.body.fit_rationale }}\\nContact: {{ $json.body.contact_name }}, {{ $json.body.contact_title }}\\n\\nDraft the outreach opener.\"\n    }\n  ],\n  \"temperature\": 0.7\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -160,
+        16
+      ],
+      "id": "1049fdf7-56b6-4bda-979d-45c0f6f173c9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "resource": "company",
+        "operation": "searchByDomain",
+        "domain": "={{ $('Webhook').item.json.body.domain }}",
+        "limit": 1,
+        "options": {
+          "properties": [
+            "name",
+            "domain",
+            "fit_score",
+            "fit_rationale"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        16
+      ],
+      "id": "b78e2b96-f828-4ea1-998e-7350522c074e",
+      "name": "Search for a company by Domain",
+      "alwaysOutputData": true,
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "mR6wz5NeQVXK0QdQ",
+          "name": "HubSpot Service Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "133a47ea-2155-43d8-babb-45a2c38dcca7",
+              "leftValue": "={{ $json.companyId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        288,
+        16
+      ],
+      "id": "3ba63ac0-5631-491b-9c64-3638a98e70f6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "resource": "company",
+        "name": "={{ $('Webhook').item.json.body.company_name }}",
+        "additionalFields": {
+          "companyDomainName": "={{ $('Webhook').item.json.body.domain }}",
+          "customPropertiesUi": {
+            "customPropertiesValues": [
+              {
+                "property": "fit_score",
+                "value": "={{ $json.properties.fit_score.versions[0].value }}"
+              },
+              {
+                "property": "fit_rationale",
+                "value": "={{ $json.properties.fit_rationale }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        112
+      ],
+      "id": "32161280-3420-4e3f-8051-1554ec461f95",
+      "name": "Create a company",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "mR6wz5NeQVXK0QdQ",
+          "name": "HubSpot Service Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.hubapi.com/crm/v3/objects/companies/{{ $('Search for a company by Domain').item.json.companyId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"name\": \"{{ $('Webhook').item.json.body.company_name }}\",\n    \"domain\": \"{{ $('Webhook').item.json.body.domain }}\",\n    \"fit_score\": \"{{ $('Webhook').item.json.body.fit_score }}\",\n    \"fit_rationale\": \"{{ $('Webhook').item.json.body.fit_rationale }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        512,
+        -80
+      ],
+      "id": "423a1b17-27ea-446f-bc03-08f3f1141c15",
+      "name": "Update Company",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4q2EDc80zpMhGOvI",
+          "name": "Header Auth account"
+        },
+        "httpBearerAuth": {
+          "id": "nZ7TZ8X851FxJraB",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $('Webhook').item.json.body.contact_email }}",
+        "additionalFields": {
+          "associatedCompanyId": "={{ $('Search for a company by Domain').item.json.companyId }}",
+          "firstName": "={{ $('Webhook').item.json.body.contact_name.split(' ')[0] }}",
+          "jobTitle": "={{ $('Webhook').item.json.body.contact_title }}",
+          "lastName": "=\t{{ $('Webhook').item.json.body.contact_name.split(' ').slice(1).join(' ') }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        736,
+        16
+      ],
+      "id": "0f48bb09-9e5f-4ae3-8b55-0407a0fab7e3",
+      "name": "Create or update a contact",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "mR6wz5NeQVXK0QdQ",
+          "name": "HubSpot Service Key account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "goldmine-plating-negligee.ngrok-free.dev",
+            "content-length": "884",
+            "accept-encoding": "gzip, deflate",
+            "content-type": "application/json",
+            "x-forwarded-for": "98.83.209.137",
+            "x-forwarded-host": "goldmine-plating-negligee.ngrok-free.dev",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "company_name": "Switch Mobility",
+            "domain": "switchmobilityev.com",
+            "fit_score": "93",
+            "fit_rationale": "Switch Mobility is primarily in the automotive manufacturing industry with a focus on electric buses and light commercial vehicles, which involves significant metal fabrication and precision engineering in the manufacturing process. The company has manufacturing operations in India with a sizable workforce of 501-1,000 employees, indicating strong procurement potential. Their operation in India and product type closely align with Atharva Metals & Engineering's ICP, with clear needs for metal components and manufacturing services. Sub-scores: Industry fit 33, Geographic fit 20, Company size 18, Need signals 22, totaling 93.",
+            "contact_name": "Tilak Ahuja",
+            "contact_title": "Vice President & Global Chief Procurement Officer",
+            "contact_email": "tilak.ahuja@switchmobilityev.com"
+          },
+          "webhookUrl": "http://localhost:5678/webhook-test/fce82f8f-8d23-48ab-90d1-28c263c81515",
+          "executionMode": "test"
+        }
+      }
+    ],
+    "HTTP Request": [
+      {
+        "json": {
+          "id": "chatcmpl-49",
+          "object": "chat.completion",
+          "created": 1788026259,
+          "model": "phi4-mini",
+          "system_fingerprint": "fp_ollama",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Dear Mr. Tilak Ahuja,\n\nI hope you are doing well. I noticed that Switch Mobility's commitment to advancing the electric vehicle sector aligns with Atharva Metals & Engineering's expertise in high-precision sheet metal stamping for automotive applications. Given Atharva's extensive experience with OEMs like Haier and Blue Star and our strong ICP in India, I believe we could significantly enhance your vehicle manufacturing with our specialized 45+ presses that could meet your precise engineering needs. Could we arrange a brief call to discuss how Atharva could support your innovative projects?\n\nWarm regards,\n\n[Your Name]\n[Your Position]\nAtharva Metals & Engineering"
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 317,
+            "completion_tokens": 133,
+            "total_tokens": 450
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Search for a company by Domain": [
+      {
+        "json": {
+          "portalId": 247190547,
+          "companyId": 342505193177,
+          "isDeleted": false,
+          "properties": {
+            "fit_score": {
+              "value": "93",
+              "timestamp": 1788025774991,
+              "source": "INTEGRATION",
+              "sourceId": "50819712",
+              "updatedByUserId": null,
+              "versions": [
+                {
+                  "name": "fit_score",
+                  "value": "93",
+                  "timestamp": 1788025774991,
+                  "sourceId": "50819712",
+                  "source": "INTEGRATION",
+                  "sourceVid": [],
+                  "requestId": "01a04ea4-234e-72a9-9396-0e4fec6c8e84",
+                  "useTimestampAsPersistenceTimestamp": true,
+                  "sourceUpstreamDeployable": "CrmPublicObjects-Service-web"
+                }
+              ]
+            },
+            "fit_rationale": {
+              "value": "Switch Mobility is primarily in the automotive manufacturing industry with a focus on electric buses and light commercial vehicles, which involves significant metal fabrication and precision engineering in the manufacturing process. The company has manufacturing operations in India with a sizable workforce of 501-1,000 employees, indicating strong procurement potential. Their operation in India and product type closely align with Atharva Metals & Engineering's ICP, with clear needs for metal components and manufacturing services. Sub-scores: Industry fit 33, Geographic fit 20, Company size 18, Need signals 22, totaling 93.",
+              "timestamp": 1788025774991,
+              "source": "INTEGRATION",
+              "sourceId": "50819712",
+              "updatedByUserId": null,
+              "versions": [
+                {
+                  "name": "fit_rationale",
+                  "value": "Switch Mobility is primarily in the automotive manufacturing industry with a focus on electric buses and light commercial vehicles, which involves significant metal fabrication and precision engineering in the manufacturing process. The company has manufacturing operations in India with a sizable workforce of 501-1,000 employees, indicating strong procurement potential. Their operation in India and product type closely align with Atharva Metals & Engineering's ICP, with clear needs for metal components and manufacturing services. Sub-scores: Industry fit 33, Geographic fit 20, Company size 18, Need signals 22, totaling 93.",
+                  "timestamp": 1788025774991,
+                  "sourceId": "50819712",
+                  "source": "INTEGRATION",
+                  "sourceVid": [],
+                  "requestId": "01a04ea4-234e-72a9-9396-0e4fec6c8e84",
+                  "useTimestampAsPersistenceTimestamp": true,
+                  "sourceUpstreamDeployable": "CrmPublicObjects-Service-web"
+                }
+              ]
+            },
+            "domain": {
+              "value": "switchmobilityev.com",
+              "timestamp": 1788025774991,
+              "source": "INTEGRATION",
+              "sourceId": "50819712",
+              "updatedByUserId": null,
+              "versions": [
+                {
+                  "name": "domain",
+                  "value": "switchmobilityev.com",
+                  "timestamp": 1788025774991,
+                  "sourceId": "50819712",
+                  "source": "INTEGRATION",
+                  "sourceVid": [],
+                  "requestId": "01a04ea4-234e-72a9-9396-0e4fec6c8e84",
+                  "useTimestampAsPersistenceTimestamp": true,
+                  "sourceUpstreamDeployable": "CrmPublicObjects-Service-web"
+                }
+              ]
+            },
+            "name": {
+              "value": "Switch Mobility",
+              "timestamp": 1788025774991,
+              "source": "INTEGRATION",
+              "sourceId": "50819712",
+              "updatedByUserId": null,
+              "versions": [
+                {
+                  "name": "name",
+                  "value": "Switch Mobility",
+                  "timestamp": 1788025774991,
+                  "sourceId": "50819712",
+                  "source": "INTEGRATION",
+                  "sourceVid": [],
+                  "requestId": "01a04ea4-234e-72a9-9396-0e4fec6c8e84",
+                  "useTimestampAsPersistenceTimestamp": true,
+                  "sourceUpstreamDeployable": "CrmPublicObjects-Service-web"
+                }
+              ]
+            }
+          },
+          "additionalDomains": [],
+          "stateChanges": [],
+          "mergeAudits": []
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Update Company": [
+      {
+        "json": {
+          "id": "342505193177",
+          "properties": {
+            "createdate": "2026-08-27T16:58:29.240Z",
+            "domain": "switchmobilityev.com",
+            "fit_rationale": "Switch Mobility is primarily in the automotive manufacturing industry with a focus on electric buses and light commercial vehicles, which involves significant metal fabrication and precision engineering in the manufacturing process. The company has manufacturing operations in India with a sizable workforce of 501-1,000 employees, indicating strong procurement potential. Their operation in India and product type closely align with Atharva Metals & Engineering's ICP, with clear needs for metal components and manufacturing services. Sub-scores: Industry fit 33, Geographic fit 20, Company size 18, Need signals 22, totaling 93.",
+            "fit_score": "93",
+            "hs_lastmodifieddate": "2026-08-29T17:49:35.549Z",
+            "hs_object_id": "342505193177",
+            "hs_object_source": "COMPANIES",
+            "hs_object_source_id": "FetchAssociatedCompanyIdStep",
+            "hs_object_source_label": "CRM_SETTING",
+            "hs_pipeline": "companies-lifecycle-pipeline",
+            "hs_task_label": "Switch Mobility",
+            "hs_updated_by_user_id": "97988578",
+            "hs_v2_date_entered_current_stage": "2026-08-27T16:58:29.240Z",
+            "hs_v2_time_in_current_stage": "2026-08-27T16:58:29.240Z",
+            "lifecyclestage": "lead",
+            "name": "Switch Mobility"
+          },
+          "createdAt": "2026-08-27T16:58:29.240Z",
+          "updatedAt": "2026-08-29T17:49:35.549Z",
+          "archived": false,
+          "url": "https://app-na2.hubspot.com/contacts/247190547/record/0-2/342505193177"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Search for a company by Domain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search for a company by Domain": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Update Company",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Company": {
+      "main": [
+        [
+          {
+            "node": "Create or update a contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a company": {
+      "main": [
+        [
+          {
+            "node": "Create or update a contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d4cd38b9-b93f-48a0-986a-7a4ff6e4c7f7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8accc6a66d2a0b24545c4412b449bf2b5a3fbe6aa95ae9ce41c8a69aaa02d357"
+  },
+  "nodeGroups": [],
+  "id": "ufkUwrB9C4GdppiS",
+  "tags": []
+}
