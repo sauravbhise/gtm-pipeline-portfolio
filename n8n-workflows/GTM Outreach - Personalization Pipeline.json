@@ -21,7 +21,9 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://172.21.192.1:11434/v1/chat/completions",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -33,7 +35,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"phi4-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are drafting a short, personalized cold outreach opener on behalf of Atharva Metals & Engineering, a Pune-based IATF 16949:2016-certified sheet metal stamping manufacturer (45+ presses, 80T-500T, serving OEMs like Haier, Blue Star, Versuni/Philips, Toro, and Haworth across appliances, automotive, and off-road vehicle categories). Write 2-3 sentences that: reference something specific and true about the target company from the fit rationale provided; connect it to a concrete Atharva capability, not a generic pitch; end with a soft, low-pressure call to action such as a brief call, not 'buy now'; avoid superlatives, hype, or generic phrases like 'we'd love to explore synergies'.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Target company: {{ $json.body.company_name }}\\nDomain: {{ $json.body.domain }}\\nFit rationale: {{ $json.body.fit_rationale }}\\nContact: {{ $json.body.contact_name }}, {{ $json.body.contact_title }}\\n\\nDraft the outreach opener.\"\n    }\n  ],\n  \"temperature\": 0.7\n}",
+        "jsonBody": "={\n  \"model\": \"gpt-4.1-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are drafting a short, personalized cold outreach opener on behalf of Atharva Metals & Engineering, a Pune-based IATF 16949:2016-certified sheet metal stamping manufacturer (45+ presses, 80T-500T, serving OEMs like Haier, Blue Star, Versuni/Philips, Toro, and Haworth across appliances, automotive, and off-road vehicle categories). Write 2-3 sentences that: reference something specific and true about the target company from the fit rationale provided; connect it to a concrete Atharva capability, not a generic pitch; end with a soft, low-pressure call to action such as a brief call, not 'buy now'; avoid superlatives, hype, or generic phrases like 'we'd love to explore synergies'.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Target company: {{ $json.body.company_name }}\\nDomain: {{ $json.body.domain }}\\nFit rationale: {{ $json.body.fit_rationale }}\\nContact: {{ $json.body.contact_name }}, {{ $json.body.contact_title }}\\n\\nDraft the outreach opener.\"\n    }\n  ],\n  \"temperature\": 0.7\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -43,7 +45,13 @@
         16
       ],
       "id": "1049fdf7-56b6-4bda-979d-45c0f6f173c9",
-      "name": "HTTP Request"
+      "name": "HTTP Request",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "mXbOObmi2Il4fuKT",
+          "name": "OpenAI API"
+        }
+      }
     },
     {
       "parameters": {
@@ -192,9 +200,9 @@
         "email": "={{ $('Webhook').item.json.body.contact_email }}",
         "additionalFields": {
           "associatedCompanyId": "={{ $('Search for a company by Domain').item.json.companyId }}",
-          "firstName": "={{ $('Webhook').item.json.body.contact_name.split(' ')[0] }}",
-          "jobTitle": "={{ $('Webhook').item.json.body.contact_title }}",
-          "lastName": "=\t{{ $('Webhook').item.json.body.contact_name.split(' ').slice(1).join(' ') }}"
+          "firstName": "={{ $('Webhook').item.json.body.contact_name.split(' ')[0].trim() }}",
+          "jobTitle": "={{ $('Webhook').item.json.body.contact_title.trim() }}",
+          "lastName": "=\t{{ $('Webhook').item.json.body.contact_name.split(' ').slice(1).join(' ').trim() }}"
         },
         "options": {}
       },
@@ -212,163 +220,61 @@
           "name": "HubSpot Service Key account"
         }
       }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/notes",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"hs_note_body\": \"{{ $('HTTP Request').item.json.choices[0].message.content }}\",\n    \"hs_timestamp\": \"{{ Date.now() }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        960,
+        16
+      ],
+      "id": "8eaad3db-ecd1-4211-9a66-bfd93012306b",
+      "name": "Create Note",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "nZ7TZ8X851FxJraB",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.hubapi.com/crm/v4/objects/notes/{{ $json.id }}/associations/contacts/{{ $('Create or update a contact').item.json.vid }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "[\n  {\n    \"associationCategory\": \"HUBSPOT_DEFINED\",\n    \"associationTypeId\": 202\n  }\n]",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1184,
+        16
+      ],
+      "id": "693a6990-debd-476e-b986-78b45335d297",
+      "name": "Associate Note to Contact",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "nZ7TZ8X851FxJraB",
+          "name": "HubSpot API"
+        }
+      }
     }
   ],
   "pinData": {
-    "Webhook": [
-      {
-        "json": {
-          "headers": {
-            "host": "goldmine-plating-negligee.ngrok-free.dev",
-            "content-length": "884",
-            "accept-encoding": "gzip, deflate",
-            "content-type": "application/json",
-            "x-forwarded-for": "98.83.209.137",
-            "x-forwarded-host": "goldmine-plating-negligee.ngrok-free.dev",
-            "x-forwarded-proto": "https"
-          },
-          "params": {},
-          "query": {},
-          "body": {
-            "company_name": "Switch Mobility",
-            "domain": "switchmobilityev.com",
-            "fit_score": "93",
-            "fit_rationale": "Switch Mobility is primarily in the automotive manufacturing industry with a focus on electric buses and light commercial vehicles, which involves significant metal fabrication and precision engineering in the manufacturing process. The company has manufacturing operations in India with a sizable workforce of 501-1,000 employees, indicating strong procurement potential. Their operation in India and product type closely align with Atharva Metals & Engineering's ICP, with clear needs for metal components and manufacturing services. Sub-scores: Industry fit 33, Geographic fit 20, Company size 18, Need signals 22, totaling 93.",
-            "contact_name": "Tilak Ahuja",
-            "contact_title": "Vice President & Global Chief Procurement Officer",
-            "contact_email": "tilak.ahuja@switchmobilityev.com"
-          },
-          "webhookUrl": "http://localhost:5678/webhook-test/fce82f8f-8d23-48ab-90d1-28c263c81515",
-          "executionMode": "test"
-        }
-      }
-    ],
-    "HTTP Request": [
-      {
-        "json": {
-          "id": "chatcmpl-49",
-          "object": "chat.completion",
-          "created": 1788026259,
-          "model": "phi4-mini",
-          "system_fingerprint": "fp_ollama",
-          "choices": [
-            {
-              "index": 0,
-              "message": {
-                "role": "assistant",
-                "content": "Dear Mr. Tilak Ahuja,\n\nI hope you are doing well. I noticed that Switch Mobility's commitment to advancing the electric vehicle sector aligns with Atharva Metals & Engineering's expertise in high-precision sheet metal stamping for automotive applications. Given Atharva's extensive experience with OEMs like Haier and Blue Star and our strong ICP in India, I believe we could significantly enhance your vehicle manufacturing with our specialized 45+ presses that could meet your precise engineering needs. Could we arrange a brief call to discuss how Atharva could support your innovative projects?\n\nWarm regards,\n\n[Your Name]\n[Your Position]\nAtharva Metals & Engineering"
-              },
-              "finish_reason": "stop"
-            }
-          ],
-          "usage": {
-            "prompt_tokens": 317,
-            "completion_tokens": 133,
-            "total_tokens": 450
-          }
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      }
-    ],
-    "Search for a company by Domain": [
-      {
-        "json": {
-          "portalId": 247190547,
-          "companyId": 342505193177,
-          "isDeleted": false,
-          "properties": {
-            "fit_score": {
-              "value": "93",
-              "timestamp": 1788025774991,
-              "source": "INTEGRATION",
-              "sourceId": "50819712",
-              "updatedByUserId": null,
-              "versions": [
-                {
-                  "name": "fit_score",
-                  "value": "93",
-                  "timestamp": 1788025774991,
-                  "sourceId": "50819712",
-                  "source": "INTEGRATION",
-                  "sourceVid": [],
-                  "requestId": "01a04ea4-234e-72a9-9396-0e4fec6c8e84",
-                  "useTimestampAsPersistenceTimestamp": true,
-                  "sourceUpstreamDeployable": "CrmPublicObjects-Service-web"
-                }
-              ]
-            },
-            "fit_rationale": {
-              "value": "Switch Mobility is primarily in the automotive manufacturing industry with a focus on electric buses and light commercial vehicles, which involves significant metal fabrication and precision engineering in the manufacturing process. The company has manufacturing operations in India with a sizable workforce of 501-1,000 employees, indicating strong procurement potential. Their operation in India and product type closely align with Atharva Metals & Engineering's ICP, with clear needs for metal components and manufacturing services. Sub-scores: Industry fit 33, Geographic fit 20, Company size 18, Need signals 22, totaling 93.",
-              "timestamp": 1788025774991,
-              "source": "INTEGRATION",
-              "sourceId": "50819712",
-              "updatedByUserId": null,
-              "versions": [
-                {
-                  "name": "fit_rationale",
-                  "value": "Switch Mobility is primarily in the automotive manufacturing industry with a focus on electric buses and light commercial vehicles, which involves significant metal fabrication and precision engineering in the manufacturing process. The company has manufacturing operations in India with a sizable workforce of 501-1,000 employees, indicating strong procurement potential. Their operation in India and product type closely align with Atharva Metals & Engineering's ICP, with clear needs for metal components and manufacturing services. Sub-scores: Industry fit 33, Geographic fit 20, Company size 18, Need signals 22, totaling 93.",
-                  "timestamp": 1788025774991,
-                  "sourceId": "50819712",
-                  "source": "INTEGRATION",
-                  "sourceVid": [],
-                  "requestId": "01a04ea4-234e-72a9-9396-0e4fec6c8e84",
-                  "useTimestampAsPersistenceTimestamp": true,
-                  "sourceUpstreamDeployable": "CrmPublicObjects-Service-web"
-                }
-              ]
-            },
-            "domain": {
-              "value": "switchmobilityev.com",
-              "timestamp": 1788025774991,
-              "source": "INTEGRATION",
-              "sourceId": "50819712",
-              "updatedByUserId": null,
-              "versions": [
-                {
-                  "name": "domain",
-                  "value": "switchmobilityev.com",
-                  "timestamp": 1788025774991,
-                  "sourceId": "50819712",
-                  "source": "INTEGRATION",
-                  "sourceVid": [],
-                  "requestId": "01a04ea4-234e-72a9-9396-0e4fec6c8e84",
-                  "useTimestampAsPersistenceTimestamp": true,
-                  "sourceUpstreamDeployable": "CrmPublicObjects-Service-web"
-                }
-              ]
-            },
-            "name": {
-              "value": "Switch Mobility",
-              "timestamp": 1788025774991,
-              "source": "INTEGRATION",
-              "sourceId": "50819712",
-              "updatedByUserId": null,
-              "versions": [
-                {
-                  "name": "name",
-                  "value": "Switch Mobility",
-                  "timestamp": 1788025774991,
-                  "sourceId": "50819712",
-                  "source": "INTEGRATION",
-                  "sourceVid": [],
-                  "requestId": "01a04ea4-234e-72a9-9396-0e4fec6c8e84",
-                  "useTimestampAsPersistenceTimestamp": true,
-                  "sourceUpstreamDeployable": "CrmPublicObjects-Service-web"
-                }
-              ]
-            }
-          },
-          "additionalDomains": [],
-          "stateChanges": [],
-          "mergeAudits": []
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      }
-    ],
     "Update Company": [
       {
         "json": {
@@ -395,6 +301,1213 @@
           "updatedAt": "2026-08-29T17:49:35.549Z",
           "archived": false,
           "url": "https://app-na2.hubspot.com/contacts/247190547/record/0-2/342505193177"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "HTTP Request": [
+      {
+        "json": {
+          "id": "chatcmpl-EII7MNnb5CxdLFz5eJTMnkJFGXcYt",
+          "object": "chat.completion",
+          "created": 1788028256,
+          "model": "gpt-4.1-mini-2025-04-14",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Hi Tilak, I noticed Switch Mobility’s focus on electric buses and light commercial vehicles involves complex sheet metal components that require consistent precision and quality. At Atharva Metals & Engineering, we specialize in high-volume sheet metal stamping with presses ranging from 80T to 500T, supporting OEMs in automotive sectors right here in India. Would you be open to a brief call to discuss how we might support your manufacturing needs?",
+                "refusal": null,
+                "annotations": []
+              },
+              "logprobs": null,
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 324,
+            "completion_tokens": 86,
+            "total_tokens": 410,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "service_tier": "default",
+          "system_fingerprint": "fp_dcfd782801"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "goldmine-plating-negligee.ngrok-free.dev",
+            "content-length": "884",
+            "accept-encoding": "gzip, deflate",
+            "content-type": "application/json",
+            "x-forwarded-for": "98.83.209.137",
+            "x-forwarded-host": "goldmine-plating-negligee.ngrok-free.dev",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "company_name": "Switch Mobility",
+            "domain": "switchmobilityev.com",
+            "fit_score": "93",
+            "fit_rationale": "Switch Mobility is primarily in the automotive manufacturing industry with a focus on electric buses and light commercial vehicles, which involves significant metal fabrication and precision engineering in the manufacturing process. The company has manufacturing operations in India with a sizable workforce of 501-1,000 employees, indicating strong procurement potential. Their operation in India and product type closely align with Atharva Metals & Engineering's ICP, with clear needs for metal components and manufacturing services. Sub-scores: Industry fit 33, Geographic fit 20, Company size 18, Need signals 22, totaling 93.",
+            "contact_name": "Tilak Ahuja",
+            "contact_title": "Sr. Vice President & Global Chief Procurement Officer",
+            "contact_email": "tilak.ahuja@switchmobilityev.com"
+          },
+          "webhookUrl": "http://localhost:5678/webhook-test/fce82f8f-8d23-48ab-90d1-28c263c81515",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Create or update a contact": [
+      {
+        "json": {
+          "vid": 543070776027,
+          "canonical-vid": 543070776027,
+          "merged-vids": [],
+          "portal-id": 247190547,
+          "is-contact": true,
+          "properties": {
+            "hs_latest_source": {
+              "value": "OFFLINE",
+              "versions": [
+                {
+                  "value": "OFFLINE",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_analytics_source_composite_data": {
+              "value": "[\"OFFLINE\",\"INTEGRATION\",\"50819712\"]",
+              "versions": [
+                {
+                  "value": "[\"OFFLINE\",\"INTEGRATION\",\"50819712\"]",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_analytics_revenue": {
+              "value": "0.0",
+              "versions": [
+                {
+                  "value": "0.0",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_prospecting_agent_total_enrolled_count": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "CALCULATED",
+                  "source-id": "InitialRollupProperties",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_membership_has_accessed_private_content": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "CALCULATED",
+                  "source-id": "CalculatedPropertyComputer",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "createdate": {
+              "value": "1788026384815",
+              "versions": [
+                {
+                  "value": "1788026384815",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_registered_member": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "CALCULATED",
+                  "source-id": "CalculatedPropertyComputer",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_object_source_id": {
+              "value": "50819712",
+              "versions": [
+                {
+                  "value": "50819712",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_analytics_num_page_views": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_v2_date_entered_current_stage": {
+              "value": "1788026384815",
+              "versions": [
+                {
+                  "value": "1788026384815",
+                  "source-type": "CALCULATED",
+                  "source-id": "CalculatedPropertyComputer",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_latest_source_timestamp": {
+              "value": "1788026340000",
+              "versions": [
+                {
+                  "value": "1788026340000",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_analytics_average_page_views": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "lastname": {
+              "value": "\tAhuja",
+              "versions": [
+                {
+                  "value": "\tAhuja",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384809,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_all_contact_vids": {
+              "value": "543070776027",
+              "versions": [
+                {
+                  "value": "543070776027",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_latest_source_composite_data": {
+              "value": "[\"OFFLINE\",\"INTEGRATION\",\"50819712\"]",
+              "versions": [
+                {
+                  "value": "[\"OFFLINE\",\"INTEGRATION\",\"50819712\"]",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_is_contact": {
+              "value": "true",
+              "versions": [
+                {
+                  "value": "true",
+                  "source-type": "CALCULATED",
+                  "source-id": null,
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_object_id": {
+              "value": "543070776027",
+              "versions": [
+                {
+                  "value": "543070776027",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_analytics_num_event_completions": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_v2_date_entered_lead": {
+              "value": "1788026384815",
+              "versions": [
+                {
+                  "value": "1788026384815",
+                  "source-type": "CALCULATED",
+                  "source-id": "StageCalculatedPropertiesRollup",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_latest_source_data_2": {
+              "value": "50819712",
+              "versions": [
+                {
+                  "value": "50819712",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_latest_source_data_1": {
+              "value": "INTEGRATION",
+              "versions": [
+                {
+                  "value": "INTEGRATION",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_is_unworked": {
+              "value": "true",
+              "versions": [
+                {
+                  "value": "true",
+                  "source-type": "CALCULATED",
+                  "source-id": "CalculatedPropertyComputer",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "firstname": {
+              "value": "Tilak",
+              "versions": [
+                {
+                  "value": "Tilak",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384809,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "associatedcompanyid": {
+              "value": "342505193177",
+              "versions": [
+                {
+                  "value": "342505193177",
+                  "source-type": "CALCULATED",
+                  "source-id": "RollupProperties",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026386542,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_num_active_contracts": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "CALCULATED",
+                  "source-id": "InitialRollupProperties",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_pipeline": {
+              "value": "contacts-lifecycle-pipeline",
+              "versions": [
+                {
+                  "value": "contacts-lifecycle-pipeline",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_social_num_broadcast_clicks": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_object_source_detail_1": {
+              "value": "n8n-integration",
+              "versions": [
+                {
+                  "value": "n8n-integration",
+                  "source-type": "INTERNAL_PROCESSING",
+                  "source-id": "RecordSourceDetailsWriterWorker",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026385520,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_messaging_engagement_score": {
+              "value": "0.65600705",
+              "versions": [
+                {
+                  "value": "0.65600705",
+                  "source-type": "EMAIL",
+                  "source-id": "MessagingContactEngagementScoreEvaluator",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788057636164,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_associated_target_accounts": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "CALCULATED",
+                  "source-id": "InitialRollupProperties",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_analytics_num_visits": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_object_source_label": {
+              "value": "INTEGRATION",
+              "versions": [
+                {
+                  "value": "INTEGRATION",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_sequences_actively_enrolled_count": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "CALCULATED",
+                  "source-id": "InitialRollupProperties",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_social_linkedin_clicks": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_analytics_source": {
+              "value": "OFFLINE",
+              "versions": [
+                {
+                  "value": "OFFLINE",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_prospecting_agent_actively_enrolled_count": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "CALCULATED",
+                  "source-id": "InitialRollupProperties",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_email_domain": {
+              "value": "switchmobilityev.com",
+              "versions": [
+                {
+                  "value": "switchmobilityev.com",
+                  "source-type": "CALCULATED",
+                  "source-id": null,
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_currently_enrolled_in_prospecting_agent": {
+              "value": "false",
+              "versions": [
+                {
+                  "value": "false",
+                  "source-type": "CALCULATED",
+                  "source-id": "CalculatedPropertyComputer",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "email": {
+              "value": "tilak.ahuja@switchmobilityev.com",
+              "versions": [
+                {
+                  "value": "tilak.ahuja@switchmobilityev.com",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_v2_time_in_current_stage": {
+              "value": "1788026384815",
+              "versions": [
+                {
+                  "value": "1788026384815",
+                  "source-type": "CALCULATED",
+                  "source-id": "CalculatedPropertyComputer",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "jobtitle": {
+              "value": "Sr. Vice President & Global Chief Procurement Officer",
+              "versions": [
+                {
+                  "value": "Sr. Vice President & Global Chief Procurement Officer",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384809,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_num_associated_open_deals": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "CALCULATED",
+                  "source-id": "InitialRollupProperties",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "lastmodifieddate": {
+              "value": "1788057636191",
+              "versions": [
+                {
+                  "value": "1788057636191",
+                  "source-type": "EMAIL",
+                  "source-id": null,
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788057636191,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                },
+                {
+                  "value": "1788026393742",
+                  "source-type": "API",
+                  "source-id": null,
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026393742,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                },
+                {
+                  "value": "1788026388637",
+                  "source-type": "ANALYTICS",
+                  "source-id": null,
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388637,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                },
+                {
+                  "value": "1788026386584",
+                  "source-type": "CALCULATED",
+                  "source-id": null,
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026386584,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                },
+                {
+                  "value": "1788026385520",
+                  "source-type": "INTERNAL_PROCESSING",
+                  "source-id": "RecordSourceDetailsWriterWorker",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026385520,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                },
+                {
+                  "value": "1788026384815",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_analytics_first_timestamp": {
+              "value": "1788026340000",
+              "versions": [
+                {
+                  "value": "1788026340000",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_full_name_or_email": {
+              "value": "Tilak Ahuja",
+              "versions": [
+                {
+                  "value": "Tilak Ahuja",
+                  "source-type": "CALCULATED",
+                  "source-id": "CalculatedPropertyComputer",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_social_google_plus_clicks": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_social_facebook_clicks": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_object_source": {
+              "value": "INTEGRATION",
+              "versions": [
+                {
+                  "value": "INTEGRATION",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_social_twitter_clicks": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_analytics_source_data_2": {
+              "value": "50819712",
+              "versions": [
+                {
+                  "value": "50819712",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "hs_analytics_source_data_1": {
+              "value": "INTEGRATION",
+              "versions": [
+                {
+                  "value": "INTEGRATION",
+                  "source-type": "ANALYTICS",
+                  "source-id": "StateBasedPropertyCalculation",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026388631,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "lifecyclestage": {
+              "value": "lead",
+              "versions": [
+                {
+                  "value": "lead",
+                  "source-type": "INTEGRATION",
+                  "source-id": "50819712",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            },
+            "num_notes": {
+              "value": "0",
+              "versions": [
+                {
+                  "value": "0",
+                  "source-type": "CALCULATED",
+                  "source-id": "InitialRollupProperties",
+                  "source-label": null,
+                  "updated-by-user-id": null,
+                  "timestamp": 1788026384815,
+                  "selected": false,
+                  "data-sensitivity": null,
+                  "is-encrypted": null
+                }
+              ]
+            }
+          },
+          "form-submissions": [],
+          "list-memberships": [],
+          "identity-profiles": [
+            {
+              "vid": 543070776027,
+              "saved-at-timestamp": 1788026385097,
+              "deleted-changed-timestamp": 0,
+              "identities": [
+                {
+                  "type": "EMAIL",
+                  "value": "tilak.ahuja@switchmobilityev.com",
+                  "timestamp": 1788026384815,
+                  "is-primary": true
+                },
+                {
+                  "type": "LEAD_GUID",
+                  "value": "f11799dc-d7a9-4392-9b03-de899c8314c8",
+                  "timestamp": 1788026385092
+                }
+              ]
+            }
+          ],
+          "merge-audits": [],
+          "associated-company": {
+            "company-id": 342505193177,
+            "portal-id": 247190547,
+            "properties": {
+              "hs_notes_next_activity_type": {
+                "value": "MEETING"
+              },
+              "num_associated_contacts": {
+                "value": "3"
+              },
+              "createdate": {
+                "value": "1787849909240"
+              },
+              "hs_analytics_latest_source_timestamp": {
+                "value": "1788026340000"
+              },
+              "hs_object_source_id": {
+                "value": "FetchAssociatedCompanyIdStep"
+              },
+              "hs_analytics_num_page_views": {
+                "value": "0"
+              },
+              "hs_v2_date_entered_current_stage": {
+                "value": "1787849909240"
+              },
+              "hs_num_open_deals": {
+                "value": "0"
+              },
+              "notes_last_updated": {
+                "value": "1787849910057"
+              },
+              "hs_last_logged_outgoing_email_date": {
+                "value": "1787839110057"
+              },
+              "hs_logo_url": {
+                "value": "https://na1.hubspot-logos.com/89ca43ae-639f-409b-8709-5227897a5aa8"
+              },
+              "hs_notes_next_activity": {
+                "value": "0-47-394632600287"
+              },
+              "first_contact_createdate": {
+                "value": "1787849908727"
+              },
+              "domain": {
+                "value": "switchmobilityev.com"
+              },
+              "hs_object_id": {
+                "value": "342505193177"
+              },
+              "name": {
+                "value": "Switch Mobility"
+              },
+              "hs_last_logged_call_date": {
+                "value": "1787849910057"
+              },
+              "hs_analytics_latest_source": {
+                "value": "OFFLINE"
+              },
+              "hs_v2_date_entered_lead": {
+                "value": "1787849909240"
+              },
+              "hs_updated_by_user_id": {
+                "value": "97988578"
+              },
+              "fit_rationale": {
+                "value": "Switch Mobility is primarily in the automotive manufacturing industry with a focus on electric buses and light commercial vehicles, which involves significant metal fabrication and precision engineering in the manufacturing process. The company has manufacturing operations in India with a sizable workforce of 501-1,000 employees, indicating strong procurement potential. Their operation in India and product type closely align with Atharva Metals & Engineering's ICP, with clear needs for metal components and manufacturing services. Sub-scores: Industry fit 33, Geographic fit 20, Company size 18, Need signals 22, totaling 93."
+              },
+              "hs_num_active_contracts": {
+                "value": "0"
+              },
+              "hs_pipeline": {
+                "value": "companies-lifecycle-pipeline"
+              },
+              "hs_analytics_latest_source_data_2": {
+                "value": "50819712"
+              },
+              "hs_analytics_latest_source_data_1": {
+                "value": "INTEGRATION"
+              },
+              "hs_num_blockers": {
+                "value": "0"
+              },
+              "hs_object_source_detail_1": {
+                "value": "\"Create and associate companies with contacts\" setting"
+              },
+              "hs_analytics_num_visits": {
+                "value": "0"
+              },
+              "hs_last_booked_meeting_date": {
+                "value": "1788109109516"
+              },
+              "hs_object_source_label": {
+                "value": "CRM_SETTING"
+              },
+              "hs_analytics_source": {
+                "value": "OFFLINE"
+              },
+              "num_contacted_notes": {
+                "value": "5"
+              },
+              "hs_task_label": {
+                "value": "Switch Mobility"
+              },
+              "hs_annual_revenue_currency_code": {
+                "value": "USD"
+              },
+              "hs_notes_last_activity": {
+                "value": "0-48-394631860953"
+              },
+              "notes_next_activity_date": {
+                "value": "1788109109516"
+              },
+              "hs_v2_time_in_current_stage": {
+                "value": "1787849909240"
+              },
+              "website": {
+                "value": "hubspot.com"
+              },
+              "hs_analytics_first_timestamp": {
+                "value": "1787849880000"
+              },
+              "hs_is_enriched": {
+                "value": "true"
+              },
+              "hs_lastmodifieddate": {
+                "value": "1788026449842"
+              },
+              "hs_num_decision_makers": {
+                "value": "0"
+              },
+              "notes_last_contacted": {
+                "value": "1787849910057"
+              },
+              "fit_score": {
+                "value": "93"
+              },
+              "hs_num_child_companies": {
+                "value": "0"
+              },
+              "hs_num_contacts_with_buying_roles": {
+                "value": "0"
+              },
+              "hs_object_source": {
+                "value": "COMPANIES"
+              },
+              "hs_analytics_source_data_2": {
+                "value": "sample-contact"
+              },
+              "hs_analytics_source_data_1": {
+                "value": "API"
+              },
+              "hs_latest_meeting_activity": {
+                "value": "1788109109516"
+              },
+              "lifecyclestage": {
+                "value": "lead"
+              },
+              "num_notes": {
+                "value": "6"
+              }
+            }
+          },
+          "isNew": false
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Create Note": [
+      {
+        "json": {
+          "id": "395415255747",
+          "properties": {
+            "hs_body_preview": "Hi Tilak, I noticed Switch Mobility’s focus on electric buses and light commercial vehicles involves complex sheet metal components that require consistent precision and quality. At Atharva Metals & Engineering, we specialize in high-volume sheet metal stamping with presses ranging from 80T to 500T, supporting OEMs in automotive sectors right here in India. Would you be open to a brief call to discuss how we might support your manufacturing needs?",
+            "hs_body_preview_html": "<html>\n<head></head>\n<body>\nHi Tilak, I noticed Switch Mobility’s focus on electric buses and light commercial vehicles involves complex sheet metal components that require consistent precision and quality. At Atharva Metals &amp; Engineering, we specialize in high-volume sheet metal stamping with presses ranging from 80T to 500T, supporting OEMs in automotive sectors right here in India. Would you be open to a brief call to discuss how we might support your manufacturing needs?\n</body>\n</html>",
+            "hs_body_preview_is_truncated": "false",
+            "hs_createdate": "2026-08-30T16:53:27.045Z",
+            "hs_lastmodifieddate": "2026-08-30T16:53:27.045Z",
+            "hs_note_body": "Hi Tilak, I noticed Switch Mobility’s focus on electric buses and light commercial vehicles involves complex sheet metal components that require consistent precision and quality. At Atharva Metals &amp; Engineering, we specialize in high-volume sheet metal stamping with presses ranging from 80T to 500T, supporting OEMs in automotive sectors right here in India. Would you be open to a brief call to discuss how we might support your manufacturing needs?",
+            "hs_obj_coords": "0-46-395415255747",
+            "hs_object_id": "395415255747",
+            "hs_object_source": "INTEGRATION",
+            "hs_object_source_id": "50819712",
+            "hs_object_source_label": "INTEGRATION",
+            "hs_timestamp": "2026-08-30T16:53:27.242Z"
+          },
+          "createdAt": "2026-08-30T16:53:27.045Z",
+          "updatedAt": "2026-08-30T16:53:27.045Z",
+          "archived": false,
+          "url": "https://app-na2.hubspot.com/contacts/247190547/objects/0-46/views/all/list?filters=%5B%7B%22property%22%3A%22hs_object_id%22%2C%22operator%22%3A%22EQ%22%2C%22value%22%3A%22395415255747%22%7D%5D"
         },
         "pairedItem": {
           "item": 0
@@ -475,6 +1588,28 @@
           }
         ]
       ]
+    },
+    "Create or update a contact": {
+      "main": [
+        [
+          {
+            "node": "Create Note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Note": {
+      "main": [
+        [
+          {
+            "node": "Associate Note to Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -483,7 +1618,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "d4cd38b9-b93f-48a0-986a-7a4ff6e4c7f7",
+  "versionId": "3a370a87-aceb-43fa-b79c-ab8ca5f05e34",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8accc6a66d2a0b24545c4412b449bf2b5a3fbe6aa95ae9ce41c8a69aaa02d357"

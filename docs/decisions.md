@@ -40,6 +40,14 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 
 ---
 
+## 2026-08-16 — Time estimate: build vs. buy (infra vs. questionnaire tool)
+
+**Decision:** Treat the questionnaire delivery and the VM/pipeline infra as two independently-paced tracks rather than one bundled effort.
+
+**Why:** The questionnaire's job is to get real data from the business, ideally on a short timeline; the VM's job is to be the long-term home for a capstone with no hard deadline. Bundling them means the business waits on my personal infra learning curve — wrong dependency direction. Explicitly decoupled with a 2-3 day fallback trigger (see questionnaire delivery decision above).
+
+---
+
 ## 2026-08-16 — Exposing self-hosted n8n to the internet
 
 **Decision:** Free-tier cloud VM (always-on), not Cloudflare Tunnel or ngrok.
@@ -57,14 +65,6 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 **Decision:** Keep the stack minimal — n8n with its default SQLite backend; intake data stays in Airtable/Sheets rather than a self-hosted Postgres instance. Clay and HubSpot remain managed SaaS (not self-hosted alternatives).
 
 **Why:** Self-hosting a database adds real ongoing maintenance (backups, patching, security) for no current benefit. Revisit only if/when the simple version's limits are actually felt.
-
----
-
-## 2026-08-16 — Time estimate: build vs. buy (infra vs. questionnaire tool)
-
-**Decision:** Treat the questionnaire delivery and the VM/pipeline infra as two independently-paced tracks rather than one bundled effort.
-
-**Why:** The questionnaire's job is to get real data from the business, ideally on a short timeline; the VM's job is to be the long-term home for a capstone with no hard deadline. Bundling them means the business waits on my personal infra learning curve — wrong dependency direction. Explicitly decoupled with a 2-3 day fallback trigger (see questionnaire delivery decision above).
 
 ---
 
@@ -282,3 +282,15 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 **Still deferred, from the 2026-08-25/26 sessions:** LLM output quality (Phi-4-mini's instruction-following gaps — invented a signature, ignored length constraints, used a phrase the prompt explicitly banned) has not been addressed; this pipeline run used the local model's imperfect output as-is, consistent with the "mechanics first, quality/final data second" two-pass approach already logged.
 
 ---
+
+## 2026-08-28 — HubSpot Notes/Associations built via HTTP Request; LLM swapped to GPT-4.1 mini; full pipeline complete
+
+**Decision:** Went with the full Notes + Associations build (two HTTP Request nodes: create note, then associate to Contact via the v4 Associations API) rather than the simpler custom-Contact-property alternative discussed earlier, despite the added complexity.
+
+**Why the more complex path, reversing the earlier lean toward "simpler":** The custom-property route was recommended primarily for build simplicity — reusing the existing Contact upsert node with one more mapped field, no new nodes needed. Went with real Notes/Associations instead specifically because HubSpot's Activity Timeline is purpose-built for logging outreach over time (each note is a distinct, timestamped record) versus a property that gets silently overwritten on every re-run — a real distinction if this pipeline is ever re-run against the same contacts more than once (which the two-pass plan already guarantees it will be, once the BDE-data pass happens). Chose the version that better resembles how a real CRM would be used, consistent with treating this as a portfolio-grade artifact, not just the fastest path to a working demo.
+
+**Finding: n8n's native Contact node returns HubSpot's legacy v1 API response shape** (`vid`, `canonical-vid`, `portal-id` at the top level), not the newer v3/v4 CRM shape used elsewhere in this pipeline (Company node, Notes API). The contact's ID needed for the Notes-Associations PUT request is `vid`, not `id` as initially assumed by analogy with the Company node's output — caught by inspecting the actual returned JSON rather than assuming consistency across HubSpot's own API surface. Third instance in this project of the same lesson (after the duplicate-form-field collapse and the Airtable Typecast research correction): verify the actual data shape against a live test before trusting an assumed structure, especially when different parts of the same platform (HubSpot v1 vs v3/v4) don't behave consistently with each other.
+
+**Small fix, same session:** contact `lastname` field carried a stray leading tab character from the name-splitting expression — resolved by adding `.trim()`.
+
+**Milestone — full pipeline complete and tested end-to-end:** 4 intake forms → Airtable (Create-or-Update) → Clay enrichment (Fit Score, Find Contacts, Email Waterfall) → n8n webhook (via ngrok) → LLM personalization → HubSpot Company (upsert via HTTP Request) → HubSpot Contact (native Create-or-Update) → HubSpot Note (created + associated via HTTP Request). LLM step confirmed swapped from local Ollama/Phi-4-mini (dev/testing) to GPT-4.1 mini (managed API) for this run — side-by-side comparison on the same Switch Mobility payload showed GPT-4.1 mini correctly followed all prompt constraints (length, no fabricated signature, no banned phrases) where Phi-4-mini failed on all three, concrete evidence supporting the earlier "local for dev, managed API for deployment" cost/quality decision.
