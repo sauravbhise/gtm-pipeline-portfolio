@@ -11,47 +11,12 @@
       "typeVersion": 2.1,
       "position": [
         -384,
-        16
+        0
       ],
       "id": "ebb5ebc9-0e60-40f8-88b1-ff577147b478",
       "name": "Webhook",
       "webhookId": "fce82f8f-8d23-48ab-90d1-28c263c81515",
       "alwaysOutputData": false
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.openai.com/v1/chat/completions",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpBearerAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"gpt-4.1-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are drafting a short, personalized cold outreach opener on behalf of Atharva Metals & Engineering, a Pune-based IATF 16949:2016-certified sheet metal stamping manufacturer (45+ presses, 80T-500T, serving OEMs like Haier, Blue Star, Versuni/Philips, Toro, and Haworth across appliances, automotive, and off-road vehicle categories). Write 2-3 sentences that: reference something specific and true about the target company from the fit rationale provided; connect it to a concrete Atharva capability, not a generic pitch; end with a soft, low-pressure call to action such as a brief call, not 'buy now'; avoid superlatives, hype, or generic phrases like 'we'd love to explore synergies'.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Target company: {{ $json.body.company_name }}\\nDomain: {{ $json.body.domain }}\\nFit rationale: {{ $json.body.fit_rationale }}\\nContact: {{ $json.body.contact_name }}, {{ $json.body.contact_title }}\\n\\nDraft the outreach opener.\"\n    }\n  ],\n  \"temperature\": 0.7\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.5,
-      "position": [
-        -160,
-        16
-      ],
-      "id": "1049fdf7-56b6-4bda-979d-45c0f6f173c9",
-      "name": "HTTP Request",
-      "credentials": {
-        "httpBearerAuth": {
-          "id": "mXbOObmi2Il4fuKT",
-          "name": "OpenAI API"
-        }
-      }
     },
     {
       "parameters": {
@@ -73,7 +38,7 @@
       "typeVersion": 2.2,
       "position": [
         64,
-        16
+        0
       ],
       "id": "b78e2b96-f828-4ea1-998e-7350522c074e",
       "name": "Search for a company by Domain",
@@ -84,6 +49,198 @@
           "name": "HubSpot Service Key account"
         }
       }
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "resource": "company",
+        "name": "={{ $('Webhook').item.json.body.company_name }}",
+        "additionalFields": {
+          "companyDomainName": "={{ $('Webhook').item.json.body.domain }}",
+          "customPropertiesUi": {
+            "customPropertiesValues": [
+              {
+                "property": "fit_score",
+                "value": "={{ $('Webhook').item.json.body.fit_score }}"
+              },
+              {
+                "property": "fit_rationale",
+                "value": "={{ $('Webhook').item.json.body.fit_rationale }}"
+              }
+            ]
+          },
+          "description": "={{ $('Webhook').item.json.body.company_description }}",
+          "linkedInCompanyPage": "={{ $('Webhook').item.json.body.company_linkedin }}",
+          "streetAddress": "={{ $('Webhook').item.json.body.location }}"
+        }
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        96
+      ],
+      "id": "32161280-3420-4e3f-8051-1554ec461f95",
+      "name": "Create a company",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "mR6wz5NeQVXK0QdQ",
+          "name": "HubSpot Service Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.hubapi.com/crm/v3/objects/companies/{{ $('Search for a company by Domain').item.json.companyId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"name\": \"{{ $('Webhook').item.json.body.company_name }}\",\n    \"domain\": \"{{ $('Webhook').item.json.body.domain }}\",\n    \"fit_score\": {{ Number($('Webhook').item.json.body.fit_score) }},\n    \"fit_rationale\": \"{{ JSON.stringify($('Webhook').item.json.body.fit_rationale).slice(1, -1) }}\",\n    \"description\": \"{{ JSON.stringify($('Webhook').item.json.body.company_description).slice(1, -1) }}\",\n    \"address\": \"{{ $('Webhook').item.json.body.location }}\",\n    \"linkedin_company_page\": \"{{ $('Webhook').item.json.body.company_linkedin }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        512,
+        -96
+      ],
+      "id": "423a1b17-27ea-446f-bc03-08f3f1141c15",
+      "name": "Update Company",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4q2EDc80zpMhGOvI",
+          "name": "Header Auth account"
+        },
+        "httpBearerAuth": {
+          "id": "nZ7TZ8X851FxJraB",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $('Webhook').item.json.body.contact_email }}",
+        "additionalFields": {
+          "associatedCompanyId": "={{ $('Search for a company by Domain').item.json.companyId }}",
+          "firstName": "={{ $('Webhook').item.json.body.contact_name.split(' ')[0].trim() }}",
+          "jobTitle": "={{ $('Webhook').item.json.body.contact_title.trim() }}",
+          "lastName": "={{ $('Webhook').item.json.body.contact_name.split(' ').slice(1).join(' ').trim() }}",
+          "linkedinUrl": "={{ $('Webhook').item.json.body.contact_linkedin}}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        1408,
+        -192
+      ],
+      "id": "0f48bb09-9e5f-4ae3-8b55-0407a0fab7e3",
+      "name": "Create or update a contact",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "mR6wz5NeQVXK0QdQ",
+          "name": "HubSpot Service Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/notes",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"hs_note_body\": \"{{ $('Run Personalization').item.json.choices[0].message.content }}\",\n    \"hs_timestamp\": \"{{ Date.now() }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1856,
+        0
+      ],
+      "id": "8eaad3db-ecd1-4211-9a66-bfd93012306b",
+      "name": "Create Note",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "nZ7TZ8X851FxJraB",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.hubapi.com/crm/v4/objects/notes/{{ $json.vid || $json.id }}/associations/contacts/{{ $('Set Contact ID').item.json.contact_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "[\n  {\n    \"associationCategory\": \"HUBSPOT_DEFINED\",\n    \"associationTypeId\": 202\n  }\n]",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2080,
+        0
+      ],
+      "id": "693a6990-debd-476e-b986-78b45335d297",
+      "name": "Associate Note to Contact",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "nZ7TZ8X851FxJraB",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7c96eed6-274e-45d8-a9fa-da307593222f",
+              "leftValue": "={{ $('Webhook').item.json.body.contact_email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        736,
+        0
+      ],
+      "id": "0dc264b7-2e10-4fff-ab5d-bee6aa2a2038",
+      "name": "Contact Email Check"
     },
     {
       "parameters": {
@@ -114,51 +271,48 @@
       "typeVersion": 2.3,
       "position": [
         288,
-        16
+        0
       ],
       "id": "3ba63ac0-5631-491b-9c64-3638a98e70f6",
+      "name": "Company Exists Check"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "04507436-a085-4055-adcb-2f62b4f828c7",
+              "leftValue": "={{ $json.results.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1184,
+        96
+      ],
+      "id": "100016fe-8330-47c4-8d30-e5829aa8b549",
       "name": "If"
     },
     {
       "parameters": {
-        "authentication": "appToken",
-        "resource": "company",
-        "name": "={{ $('Webhook').item.json.body.company_name }}",
-        "additionalFields": {
-          "companyDomainName": "={{ $('Webhook').item.json.body.domain }}",
-          "customPropertiesUi": {
-            "customPropertiesValues": [
-              {
-                "property": "fit_score",
-                "value": "={{ $json.properties.fit_score.versions[0].value }}"
-              },
-              {
-                "property": "fit_rationale",
-                "value": "={{ $json.properties.fit_rationale }}"
-              }
-            ]
-          }
-        }
-      },
-      "type": "n8n-nodes-base.hubspot",
-      "typeVersion": 2.2,
-      "position": [
-        512,
-        112
-      ],
-      "id": "32161280-3420-4e3f-8051-1554ec461f95",
-      "name": "Create a company",
-      "credentials": {
-        "hubspotAppToken": {
-          "id": "mR6wz5NeQVXK0QdQ",
-          "name": "HubSpot Service Key account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "method": "PATCH",
-        "url": "=https://api.hubapi.com/crm/v3/objects/companies/{{ $('Search for a company by Domain').item.json.companyId }}",
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts/search",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpBearerAuth",
         "sendHeaders": true,
@@ -172,74 +326,17 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"properties\": {\n    \"name\": \"{{ $('Webhook').item.json.body.company_name }}\",\n    \"domain\": \"{{ $('Webhook').item.json.body.domain }}\",\n    \"fit_score\": \"{{ $('Webhook').item.json.body.fit_score }}\",\n    \"fit_rationale\": \"{{ $('Webhook').item.json.body.fit_rationale }}\"\n  }\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.5,
-      "position": [
-        512,
-        -80
-      ],
-      "id": "423a1b17-27ea-446f-bc03-08f3f1141c15",
-      "name": "Update Company",
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "4q2EDc80zpMhGOvI",
-          "name": "Header Auth account"
-        },
-        "httpBearerAuth": {
-          "id": "nZ7TZ8X851FxJraB",
-          "name": "Bearer Auth account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "authentication": "appToken",
-        "email": "={{ $('Webhook').item.json.body.contact_email }}",
-        "additionalFields": {
-          "associatedCompanyId": "={{ $('Search for a company by Domain').item.json.companyId }}",
-          "firstName": "={{ $('Webhook').item.json.body.contact_name.split(' ')[0].trim() }}",
-          "jobTitle": "={{ $('Webhook').item.json.body.contact_title.trim() }}",
-          "lastName": "=\t{{ $('Webhook').item.json.body.contact_name.split(' ').slice(1).join(' ').trim() }}"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.hubspot",
-      "typeVersion": 2.2,
-      "position": [
-        736,
-        16
-      ],
-      "id": "0f48bb09-9e5f-4ae3-8b55-0407a0fab7e3",
-      "name": "Create or update a contact",
-      "credentials": {
-        "hubspotAppToken": {
-          "id": "mR6wz5NeQVXK0QdQ",
-          "name": "HubSpot Service Key account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.hubapi.com/crm/v3/objects/notes",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpBearerAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"properties\": {\n    \"hs_note_body\": \"{{ $('HTTP Request').item.json.choices[0].message.content }}\",\n    \"hs_timestamp\": \"{{ Date.now() }}\"\n  }\n}",
+        "jsonBody": "={\n  \"filterGroups\": [\n    {\n      \"filters\": [\n        {\n          \"propertyName\": \"hs_linkedin_url\",\n          \"operator\": \"EQ\",\n          \"value\": \"{{ $('Webhook').item.json.body.contact_linkedin }}\"\n        }\n      ]\n    }\n  ]\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
         960,
-        16
+        96
       ],
-      "id": "8eaad3db-ecd1-4211-9a66-bfd93012306b",
-      "name": "Create Note",
+      "id": "07758f9e-3ef7-4a48-9acb-17decbcd2f0a",
+      "name": "Search Contact w/ LinkedIn",
       "credentials": {
         "httpBearerAuth": {
           "id": "nZ7TZ8X851FxJraB",
@@ -249,29 +346,131 @@
     },
     {
       "parameters": {
-        "method": "PUT",
-        "url": "=https://api.hubapi.com/crm/v4/objects/notes/{{ $json.id }}/associations/contacts/{{ $('Create or update a contact').item.json.vid }}",
+        "method": "PATCH",
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $json.results[0].id }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "[\n  {\n    \"associationCategory\": \"HUBSPOT_DEFINED\",\n    \"associationTypeId\": 202\n  }\n]",
+        "jsonBody": "={\n  \"properties\": {\n    \"firstname\": \"{{ $('Webhook').item.json.body.contact_name.split(' ')[0] }}\",\n    \"lastname\": \"{{ $('Webhook').item.json.body.contact_name.split(' ').slice(1).join(' ') }}\",\n    \"jobtitle\": \"{{ $('Webhook').item.json.body.contact_title }}\",\n    \"hs_linkedin_url\": \"{{ $('Webhook').item.json.body.contact_linkedin }}\"\n  }\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        1184,
-        16
+        1408,
+        0
       ],
-      "id": "693a6990-debd-476e-b986-78b45335d297",
-      "name": "Associate Note to Contact",
+      "id": "9a45721a-f2af-40ee-a12a-bd4041446451",
+      "name": "Update Contact",
       "credentials": {
         "httpBearerAuth": {
           "id": "nZ7TZ8X851FxJraB",
           "name": "HubSpot API"
         }
       }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"firstname\": \"{{ $('Webhook').item.json.body.contact_name.split(' ')[0] }}\",\n    \"lastname\": \"{{ $('Webhook').item.json.body.contact_name.split(' ').slice(1).join(' ') }}\",\n    \"jobtitle\": \"{{ $('Webhook').item.json.body.contact_title }}\",\n    \"hs_linkedin_url\": \"{{ $('Webhook').item.json.body.contact_linkedin }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1408,
+        192
+      ],
+      "id": "a335a74a-e5f1-4a17-99ac-934478dbf242",
+      "name": "Create Contact",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "nZ7TZ8X851FxJraB",
+          "name": "HubSpot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4.1-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are drafting a short, personalized cold outreach opener on behalf of Atharva Metals & Engineering, a Pune-based IATF 16949:2016-certified sheet metal stamping manufacturer (45+ presses, 80T-500T, serving OEMs like Haier, Blue Star, Versuni/Philips, Toro, and Haworth across appliances, HVAC, and automotive categories). Atharva's customers consistently prioritize quality, reliability, and long-term relationships over lowest price — lead with that positioning, not cost.\\n\\nWrite 2-3 sentences that:\\n- Pull ONE concrete, specific detail from the company description provided (a named product line, a specific certification, a specific facility or capability) rather than a generic paraphrase — reference that specific detail directly, not a vague inference like \\\"your requirements likely demand quality.\\\"\\n- Connect the reference to a concrete Atharva capability (materials, tonnage, certification, or turnaround) — not a generic pitch.\\n- End with a soft, low-pressure call to action (e.g., a brief call), not \\\"buy now\\\" language.\\n- Avoid superlatives, hype, generic phrases like \\\"we'd love to explore synergies,\\\" and vague hedging language like \\\"likely\\\" or \\\"probably.\\\" Do not include a greeting, sign-off, signature, or placeholder name/title — output only the message body itself.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Target company: {{ $json.body.company_name }}\\nDomain: {{ $json.body.domain }}\\nCompany description: {{ JSON.stringify($json.body.company_description).slice(1, -1) }}\\nFit rationale: {{ JSON.stringify($json.body.fit_rationale).slice(1, -1) }}\\nContact: {{ $json.body.contact_name }}, {{ $json.body.contact_title }}\\n\\nDraft the outreach opener.\"\n    }\n  ],\n  \"temperature\": 0.7\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -160,
+        0
+      ],
+      "id": "1049fdf7-56b6-4bda-979d-45c0f6f173c9",
+      "name": "Run Personalization",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "mXbOObmi2Il4fuKT",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cf20d624-0795-4757-a00f-bd3d171b39d1",
+              "name": "contact_id",
+              "value": "={{ $json.vid || $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1632,
+        0
+      ],
+      "id": "64448cf4-1f9d-4463-b90f-1b48a4bfe1de",
+      "name": "Set Contact ID"
     }
   ],
   "pinData": {
@@ -301,80 +500,6 @@
           "updatedAt": "2026-08-29T17:49:35.549Z",
           "archived": false,
           "url": "https://app-na2.hubspot.com/contacts/247190547/record/0-2/342505193177"
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      }
-    ],
-    "HTTP Request": [
-      {
-        "json": {
-          "id": "chatcmpl-EII7MNnb5CxdLFz5eJTMnkJFGXcYt",
-          "object": "chat.completion",
-          "created": 1788028256,
-          "model": "gpt-4.1-mini-2025-04-14",
-          "choices": [
-            {
-              "index": 0,
-              "message": {
-                "role": "assistant",
-                "content": "Hi Tilak, I noticed Switch Mobility’s focus on electric buses and light commercial vehicles involves complex sheet metal components that require consistent precision and quality. At Atharva Metals & Engineering, we specialize in high-volume sheet metal stamping with presses ranging from 80T to 500T, supporting OEMs in automotive sectors right here in India. Would you be open to a brief call to discuss how we might support your manufacturing needs?",
-                "refusal": null,
-                "annotations": []
-              },
-              "logprobs": null,
-              "finish_reason": "stop"
-            }
-          ],
-          "usage": {
-            "prompt_tokens": 324,
-            "completion_tokens": 86,
-            "total_tokens": 410,
-            "prompt_tokens_details": {
-              "cached_tokens": 0,
-              "audio_tokens": 0
-            },
-            "completion_tokens_details": {
-              "reasoning_tokens": 0,
-              "audio_tokens": 0,
-              "accepted_prediction_tokens": 0,
-              "rejected_prediction_tokens": 0
-            }
-          },
-          "service_tier": "default",
-          "system_fingerprint": "fp_dcfd782801"
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      }
-    ],
-    "Webhook": [
-      {
-        "json": {
-          "headers": {
-            "host": "goldmine-plating-negligee.ngrok-free.dev",
-            "content-length": "884",
-            "accept-encoding": "gzip, deflate",
-            "content-type": "application/json",
-            "x-forwarded-for": "98.83.209.137",
-            "x-forwarded-host": "goldmine-plating-negligee.ngrok-free.dev",
-            "x-forwarded-proto": "https"
-          },
-          "params": {},
-          "query": {},
-          "body": {
-            "company_name": "Switch Mobility",
-            "domain": "switchmobilityev.com",
-            "fit_score": "93",
-            "fit_rationale": "Switch Mobility is primarily in the automotive manufacturing industry with a focus on electric buses and light commercial vehicles, which involves significant metal fabrication and precision engineering in the manufacturing process. The company has manufacturing operations in India with a sizable workforce of 501-1,000 employees, indicating strong procurement potential. Their operation in India and product type closely align with Atharva Metals & Engineering's ICP, with clear needs for metal components and manufacturing services. Sub-scores: Industry fit 33, Geographic fit 20, Company size 18, Need signals 22, totaling 93.",
-            "contact_name": "Tilak Ahuja",
-            "contact_title": "Sr. Vice President & Global Chief Procurement Officer",
-            "contact_email": "tilak.ahuja@switchmobilityev.com"
-          },
-          "webhookUrl": "http://localhost:5678/webhook-test/fce82f8f-8d23-48ab-90d1-28c263c81515",
-          "executionMode": "test"
         },
         "pairedItem": {
           "item": 0
@@ -1520,18 +1645,7 @@
       "main": [
         [
           {
-            "node": "HTTP Request",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "HTTP Request": {
-      "main": [
-        [
-          {
-            "node": "Search for a company by Domain",
+            "node": "Run Personalization",
             "type": "main",
             "index": 0
           }
@@ -1542,14 +1656,76 @@
       "main": [
         [
           {
-            "node": "If",
+            "node": "Company Exists Check",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If": {
+    "Update Company": {
+      "main": [
+        [
+          {
+            "node": "Contact Email Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a company": {
+      "main": [
+        [
+          {
+            "node": "Contact Email Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a contact": {
+      "main": [
+        [
+          {
+            "node": "Set Contact ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Note": {
+      "main": [
+        [
+          {
+            "node": "Associate Note to Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact Email Check": {
+      "main": [
+        [
+          {
+            "node": "Create or update a contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search Contact w/ LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Company Exists Check": {
       "main": [
         [
           {
@@ -1567,44 +1743,78 @@
         ]
       ]
     },
-    "Update Company": {
+    "Search Contact w/ LinkedIn": {
       "main": [
         [
           {
-            "node": "Create or update a contact",
+            "node": "If",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Create a company": {
+    "If": {
       "main": [
         [
           {
-            "node": "Create or update a contact",
+            "node": "Update Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Contact",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Create or update a contact": {
+    "Update Contact": {
+      "main": [
+        [
+          {
+            "node": "Set Contact ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Contact": {
+      "main": [
+        [
+          {
+            "node": "Set Contact ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Personalization": {
+      "main": [
+        [
+          {
+            "node": "Search for a company by Domain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Associate Note to Contact": {
+      "main": [
+        []
+      ]
+    },
+    "Set Contact ID": {
       "main": [
         [
           {
             "node": "Create Note",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Create Note": {
-      "main": [
-        [
-          {
-            "node": "Associate Note to Contact",
             "type": "main",
             "index": 0
           }
@@ -1618,7 +1828,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "3a370a87-aceb-43fa-b79c-ab8ca5f05e34",
+  "versionId": "8d1406ec-6de9-4067-ad84-2b0c77394e5b",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8accc6a66d2a0b24545c4412b449bf2b5a3fbe6aa95ae9ce41c8a69aaa02d357"

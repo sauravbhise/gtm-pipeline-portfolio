@@ -294,3 +294,77 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 **Small fix, same session:** contact `lastname` field carried a stray leading tab character from the name-splitting expression — resolved by adding `.trim()`.
 
 **Milestone — full pipeline complete and tested end-to-end:** 4 intake forms → Airtable (Create-or-Update) → Clay enrichment (Fit Score, Find Contacts, Email Waterfall) → n8n webhook (via ngrok) → LLM personalization → HubSpot Company (upsert via HTTP Request) → HubSpot Contact (native Create-or-Update) → HubSpot Note (created + associated via HTTP Request). LLM step confirmed swapped from local Ollama/Phi-4-mini (dev/testing) to GPT-4.1 mini (managed API) for this run — side-by-side comparison on the same Switch Mobility payload showed GPT-4.1 mini correctly followed all prompt constraints (length, no fabricated signature, no banned phrases) where Phi-4-mini failed on all three, concrete evidence supporting the earlier "local for dev, managed API for deployment" cost/quality decision.
+
+---
+
+## 2026-08-28 — Deferred cloud deployment for the BDE-data pass; running locally at 150-row scale instead
+
+**Decision:** Run the final BDE-data pass (150 companies through the full pipeline) on the existing local n8n + ngrok setup rather than completing the managed self-host deployment first, reversing the plan implied by the original two-pass framing.
+
+**Why:** No near-term expectation of running this pipeline regularly or on an ongoing basis — it's not becoming a live, continuously-used tool for Atharva in the immediate future. Given that, the concrete benefits of cloud deployment (reliability during long/unattended runs, a persistent demoable artifact independent of a laptop being on, proving the upsert logic against real cloud infra) don't currently outweigh the setup time, since the pipeline's actual near-term usage pattern is occasional/demo-oriented rather than continuous.
+
+**Real risk accepted, not ignored:** ngrok's free-tier tunnel reliability over a sustained 150-row run is a genuine concern (a mid-batch drop means a partial run and manual reconciliation of which rows completed). Mitigated procedurally rather than architecturally — disabled sleep/lock during the run, kept the ngrok terminal visible to catch a drop immediately, and split the batch into smaller chunks rather than one continuous 150-row run, so any failure has a small, easily-identified blast radius.
+
+**Worth revisiting:** if this pipeline is ever picked up for regular/ongoing use by Atharva's BD team, or if a persistent demoable version becomes valuable for the job search / portfolio phase, the cloud deployment plan (managed self-host n8n + managed LLM API, both already decided and quantified in the 2026-08-25 entries) remains the documented next step — nothing about this decision invalidates that plan, it's a "not now" based on actual near-term need, not a reversal.
+
+---
+
+## 2026-09-02/03 — Trial-expiry pivot: burn credits, abandon job postings, prioritize time over cost
+
+**Decision:** On discovering Clay's trial credits expire with the trial (not carried into the permanent Free plan) and only ~5 days remained, reversed the BYOK-for-savings strategy from 2026-08-25 — ran Fit Score and all AI columns on Clay's managed account rather than personal API keys, since unspent credits would be lost regardless. Re-prioritized remaining time around maximizing throughput (company volume, enrichment completeness) rather than credit efficiency, since credit math confirmed 6+ full passes were affordable within the trial — time, not credits, was the real constraint.
+
+**Job postings signal abandoned, not just cost-deferred:** Tested two providers (Clay-native "Find active job openings" at 0.5/row, then Pubrio's "Find open jobs at company" at 5/row once cost stopped mattering) against the same best-case company (Panasonic). Both returned zero India-relevant results — Pubrio found 4 jobs, none in India (Canada, Warsaw, Mexico). Two independent providers failing identically on the best-case test company confirmed a structural India-market coverage gap in job-listing data sources generally, not a provider-specific or filter-specific issue. Dropped this signal type entirely rather than testing a third provider.
+
+**News-based signal kept and built out successfully** — Google News search + a structured-output ("hasSignal"/"signal"/"signalType") summarization AI column, with explicit rules to exclude negative/risk signals, off-topic noise, and duplicate stories, and to never fabricate a signal when none exists. Tested against real Panasonic data (10 raw results, mostly noise) and correctly isolated the one genuine signal (investment commitment) while excluding a shutdown-risk story and irrelevant results.
+
+---
+
+## 2026-09-02/03 — Fit Score rebuilt with structured output, competitor exclusion, and manual-target exemption
+
+**Decision:** Rebuilt the Fit Score column (deleted and restarted) using JSON structured output (`companyName`, `rationale`, `isCompetitorOrSupplier`, `industryFit`, `geographicFit`, `companySize`, `needSignals`, `total`) instead of free-text output — enables direct field mapping into Airtable/HubSpot without string parsing, and gives filtering logic (competitor exclusion, cutoff threshold) a clean boolean/integer to check rather than parsing rationale text.
+
+**Reweighted Industry Fit per BDE real data:** white goods/appliances scores at/near max (proven 80% of Atharva's revenue); automotive scores well but moderately lower (proven capability match but only ~1% of actual revenue); furniture and off-road explicitly instructed as moderate-to-strong, not underweighted relative to automotive — corrects an earlier version that risked over-indexing on automotive given the original search results skewed that direction.
+
+**Manual targets exempted from the ≥70 cutoff.** Discovered via real Fit Score runs (Panasonic scored 48, later corrected context showed research kept landing on wrong Panasonic sub-entities out of 6+ LinkedIn pages) that large multi-entity named targets are the ones most likely to be incorrectly filtered out by a pure score cutoff — precisely because their scale/complexity makes cold research harder, not because they're poor fits. All BDE-named and PLI-sourced manual targets advance regardless of score; only Company-Search-sourced rows are filtered at ≥70.
+
+**60-69 band gets manual review, not auto-exclusion.** Established after Fybros (68) and Mitsubishi Electric Europe BV (65) were both found to be genuine category matches (fans/HVAC, matching real Atharva customer categories) scored low due to "no evidence found" rather than "evidence of mismatch" — the AI scores conservatively when research is inconclusive, which isn't the same as a bad fit. Kampmann Group (63) was correctly excluded on manual review — genuine category miss (building climate-systems integration vs. Atharva's proven appliance-manufacturing HVAC category), not a confidence problem.
+
+---
+
+## 2026-09-02/03 — Contact handling: dedup to one per company; no-email contacts get a real match key
+
+**Decision:** After Find Contacts frequently returned many near-duplicate contacts per company (Havells alone returned ~15), applied a manual "keep best match per company" pass rather than pushing all returned contacts through — prioritizing exact persona/title matches (e.g., "Sourcing Procurement Manager" over multiple generic "Production Manager" hits).
+
+**No-email contacts get a genuine upsert, not a synthetic email or one-way create.** HubSpot's native Contact node requires email as its match key; initially considered a synthetic/placeholder email but rejected it as fake data sitting in a real field. Confirmed `hs_linkedin_url` is a real, working, HubSpot-defined default Contact property (verified against live account data after conflicting community reports about its visibility) — used as the match key for a manual Search → If → Update/Create pattern (same shape as the Company upsert), giving no-email contacts a real upsert path instead of a fake email or create-only branch.
+
+**Personalization and Note creation moved to run unconditionally, not gated by email status.** Original design skipped LLM personalization entirely for no-email contacts on the reasoning that "no email means no automated send anyway." Reversed once it was clear nothing in the pipeline sends email automatically regardless — the Note is always a manual-send draft. No-email contacts are exactly the ones where a strong draft matters most, since a human already has more manual work to do (finding contact info) — worth doing the personalization for them too, not less.
+
+---
+
+## 2026-09-02/03 — Personalization prompt: added company_description for specificity; dropped opportunity-signal fields after a root-caused Clay bug
+
+**Finding:** Testing the personalization output against Switch Mobility (no opportunity signal available) showed the LLM correctly followed all format rules but produced only generic, hedged language ("your requirements likely demand quality") — traced to the input itself: the Fit Score rationale is once-paraphrased AI summary, not concrete facts. Fixed by adding the original scraped `company_description` as a second input field, with an explicit instruction to pull one concrete, named detail (a product line, certification, or facility) rather than paraphrase further.
+
+**`has_signal`/`signal` fields removed from the payload after causing a silent Clay-side failure.** Adding these two fields to the Clay → n8n HTTP body caused every enrichment run to hang indefinitely with zero trace in n8n's logs — isolated via a systematic one-field-at-a-time re-add process (after confirming via direct curl that n8n/ngrok were completely healthy) to these two fields specifically. Root cause not fully diagnosed (likely a Clay-side JSON construction issue with the boolean/conditional field), but rather than continuing to debug under time pressure, removed both fields and dropped the opportunity-signal → personalization linkage for this pass. News/Summarization data still exists in Clay and HubSpot Company records but isn't currently feeding into the outreach draft text.
+
+---
+
+## 2026-09-02/03 — Recurring n8n bug pattern: unescaped free-text fields breaking raw JSON HTTP bodies
+
+**Finding, hit three separate times across three different nodes (LLM Personalization, Create Note, Update Company):** any HTTP Request node using a raw JSON body string that directly interpolates a long free-text field (`fit_rationale`, `company_description`) breaks with a "bad control character" JSON parse error whenever that field contains a real line break or embedded quote — which scraped company descriptions and AI-generated rationales both do routinely. Root cause: expression interpolation into a hand-written JSON string doesn't automatically escape special characters the way HubSpot/OpenAI's own SDKs would.
+
+**Standing fix, applied as a rule going forward:** any field genuinely likely to contain multi-sentence or scraped text must be wrapped `{{ JSON.stringify(fieldRef).slice(1, -1) }}` before insertion into a raw JSON body — short/simple fields (names, titles, scores, domains, single URLs) don't need this treatment. Documented here so this isn't re-debugged from scratch again if it resurfaces in a node not yet touched.
+
+**Separate, related bug: duplicate default node names caused wrong `$()` reference resolution.** Multiple HTTP Request nodes left with n8n's default "HTTP Request" name caused a downstream expression (`$('HTTP Request')`) to silently resolve to the wrong node depending on which branch executed, producing "node hasn't been executed" errors that looked like a logic bug but were actually a naming collision. Fixed by renaming every node to a unique, specific name — adopted as a standing practice for all future nodes in this workflow.
+
+---
+
+## 2026-09-03 — v1 pipeline complete: full BDE-data run successful across all 19 contacts
+
+**Milestone:** First fully successful end-to-end run of the complete pipeline against real, BDE-informed data — all 19 contacts (spanning both the has-email and no-email branches, both native and custom HubSpot upsert paths, both Company and Contact records, with Notes created and correctly associated) processed without error. This closes out v1 of the pipeline as originally scoped: 4 intake forms → Airtable → Clay enrichment (Fit Score, Find Contacts, Email Waterfall, News/Summarization) → n8n (LLM personalization, dual Contact-branch handling) → HubSpot (Company, Contact, Note).
+
+**What "v1 complete" means in practice:** every major bug class hit during this final sprint (JSON escaping, node-naming collisions, the email-required Contact constraint, the enum-restricted HubSpot `industry` field, the Clay HTTP timeout tied to specific payload fields) has been found and fixed at least once, and the fixes held across a real multi-branch batch, not just isolated single-row tests.
+
+**Next phase:** repeat the Clay search → curate → enrich → push cycle to process additional batches within the remaining trial window, maximizing total prospect volume before credits/trial access expire, per the strategy locked on 2026-09-02/03.
+
+---
