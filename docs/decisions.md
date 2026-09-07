@@ -56,7 +56,8 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 
 - Cloudflare Tunnel — free, no port-forwarding, but requires my laptop to stay on and running
 - ngrok/localtunnel — fast but rotating URLs on free tier, unsuitable for sharing with a non-technical recipient over several days
-  **Why:** The intake form is step one of a longer-lived pipeline (Clay → n8n → LLM → HubSpot) that needs a permanent home regardless. Doing the VM setup now avoids redoing infra work later in the roadmap. Chosen deliberately as a skill-building opportunity, not just the path of least resistance — self-hosting/infra ownership is a stated personal differentiator for GTM-engineer positioning.
+
+**Why:** The intake form is step one of a longer-lived pipeline (Clay → n8n → LLM → HubSpot) that needs a permanent home regardless. Doing the VM setup now avoids redoing infra work later in the roadmap. Chosen deliberately as a skill-building opportunity, not just the path of least resistance — self-hosting/infra ownership is a stated personal differentiator for GTM-engineer positioning.
 
 ---
 
@@ -94,7 +95,8 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 - **AWS / Azure** — free tier is a 12-month window only, then bills at standard rates; wrong shape for a "forever free" build
 - **Hetzner** — not free, but ~$5/mo removes every free-tier caveat; kept as a mental fallback if both free options fail
 - **Railway / Render / Fly.io (PaaS)** — fastest to deploy, but less infra-ownership learning value and free tiers often cold-start/sleep
-  **Why:** Oracle offers meaningfully more headroom (2 OCPU/12GB, vs GCP's ~1GB) for growing the pipeline on one box later, and the extra setup friction is treated as a feature, not a bug, given the stated goal of building genuine infra/self-hosting skill as a differentiator. Time-boxed explicitly so a stuck Oracle provisioning attempt can't stall the whole project — GCP is right there as a real, not hypothetical, fallback.
+
+**Why:** Oracle offers meaningfully more headroom (2 OCPU/12GB, vs GCP's ~1GB) for growing the pipeline on one box later, and the extra setup friction is treated as a feature, not a bug, given the stated goal of building genuine infra/self-hosting skill as a differentiator. Time-boxed explicitly so a stuck Oracle provisioning attempt can't stall the whole project — GCP is right there as a real, not hypothetical, fallback.
 
 ---
 
@@ -115,7 +117,8 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 1. **Billing-address verification failure** — Oracle repeatedly rejected a billing address that matched the card issuer's records exactly, a known and commonly-reported issue with no reliable single fix (tried reformatting state name, disabling autofill — didn't resolve it).
 2. **Client-side signup bug** — after resolving the billing prompt, the "Start My Trial" flow hung on a spinner; network logs showed a CORS error and a blocked request (`ora_code.js`) on Oracle's own signup script, unrelated to anything on my end.
 3. **Known capacity risk, never even reached** — researched best-odds regions (Singapore, Frankfurt) in case provisioning itself also failed, but didn't get that far given the above.
-   **Why give up rather than push through:** The original case for Oracle was more RAM/OCPU headroom (2 OCPU/12GB vs GCP's ~1GB) in exchange for accepting more setup friction as a deliberate skill-building tradeoff (see 2026-08-16 VM provider entry). That tradeoff assumed the friction would be _capacity-related_ — a known, bounded risk we'd already planned around. Instead the failures were pre-provisioning, on Oracle's own signup infrastructure, with no clear resolution path and no way to know if a fourth attempt would succeed. Continuing to debug someone else's broken signup flow stopped being "infra-ownership skill-building" and became pure sunk-cost risk with no learning value. GCP was the pre-agreed fallback for exactly this scenario (see 2026-08-16 provider selection entry) — used as intended rather than reactively.
+
+**Why give up rather than push through:** The original case for Oracle was more RAM/OCPU headroom (2 OCPU/12GB vs GCP's ~1GB) in exchange for accepting more setup friction as a deliberate skill-building tradeoff (see 2026-08-16 VM provider entry). That tradeoff assumed the friction would be _capacity-related_ — a known, bounded risk we'd already planned around. Instead the failures were pre-provisioning, on Oracle's own signup infrastructure, with no clear resolution path and no way to know if a fourth attempt would succeed. Continuing to debug someone else's broken signup flow stopped being "infra-ownership skill-building" and became pure sunk-cost risk with no learning value. GCP was the pre-agreed fallback for exactly this scenario (see 2026-08-16 provider selection entry) — used as intended rather than reactively.
 
 **Outcome:** GCP e2-micro provisioned successfully via Terraform (see `infra/`) on first attempt, `us-central1-c`, no capacity or billing issues encountered.
 
@@ -139,7 +142,8 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 
 - Visible text field, retyped by the respondent on each chapter — real risk of inconsistent spelling ("Atharva Metals" vs "Atharva Metals & Engineering") breaking the Airtable match/upsert logic across chapters
 - Hidden field pre-filled via URL query parameter, auto-carried between chapters — more "dynamic," reusable across companies without editing the workflow, but requires either manually constructing correct URLs each time or building an auto-generate-next-link step
-  **Why:** For a single-respondent, single-company use case, hardcoding in the workflow is simpler and more reliable than trusting free-text consistency across 4 separate sessions. Reusing this for a future company only costs a 10-second edit to the Set node's value — not real friction. The query-parameter approach was consciously deferred rather than rejected: worth building once there's a second real company to justify the extra plumbing, not speculatively now.
+
+**Why:** For a single-respondent, single-company use case, hardcoding in the workflow is simpler and more reliable than trusting free-text consistency across 4 separate sessions. Reusing this for a future company only costs a 10-second edit to the Set node's value — not real friction. The query-parameter approach was consciously deferred rather than rejected: worth building once there's a second real company to justify the extra plumbing, not speculatively now.
 
 ---
 
@@ -237,7 +241,8 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 
 - LLM personalization API calls (Claude/OpenAI) are pay-per-token, unlike Clay's pooled credit model — building and testing the Outreach Angle step now means paying for those calls twice (once now, once after the Fit Score refresh). Judged acceptable at ~11 rows.
 - The shortlist membership may shift once Fit Score is re-run with the growth-partner framing and any BDE-corrected facts — work already done downstream (contacts, emails, draft outreach) for a company that later falls out of the ≥80 threshold becomes throwaway. Acceptable for a capstone/demo; would need real thought before treating this pattern as production-safe with real spend at stake.
-  **Requirement this places on the HubSpot sync design:** must use a stable match key (company domain, mirroring the `Company Name` match-key pattern already used for Airtable) so the eventual BDE-informed re-run _updates_ existing HubSpot records via upsert rather than creating duplicates. Building this correctly on the first pass, not deferring it — a re-run that creates duplicate CRM records would undermine the entire point of treating the second pass as validation rather than a fresh start.
+
+**Requirement this places on the HubSpot sync design:** must use a stable match key (company domain, mirroring the `Company Name` match-key pattern already used for Airtable) so the eventual BDE-informed re-run _updates_ existing HubSpot records via upsert rather than creating duplicates. Building this correctly on the first pass, not deferring it — a re-run that creates duplicate CRM records would undermine the entire point of treating the second pass as validation rather than a fresh start.
 
 **Framing for the portfolio:** the two-pass approach is being treated as a feature to highlight, not a shortcut to hide — demonstrating the pipeline correctly handling a real data refresh (clean upsert, no duplicates, shortlist re-evaluation) is a stronger capstone story than a single clean run would be.
 
@@ -367,4 +372,50 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 
 **Next phase:** repeat the Clay search → curate → enrich → push cycle to process additional batches within the remaining trial window, maximizing total prospect volume before credits/trial access expire, per the strategy locked on 2026-09-02/03.
 
+**Documentation note:** this entry also marks a fix to the decisions log itself — every previous edit in this file had been inserting new content immediately before the "Time estimate: build vs. buy" entry (2026-08-16), which pinned that entry to the end of the file regardless of its actual date. Corrected by moving it to its proper chronological position (immediately after the "Intake questionnaire delivery" entry it references). Worth remembering for any future edits: anchor insertions to the actual most-recent entry at the time of writing, not a fixed historical anchor point.
+
 ---
+
+## 2026-09-03 — Scaling sprint: 82 contacts pushed to HubSpot; geography rotation findings
+
+**Milestone:** 82 total contacts processed through the full pipeline and pushed to HubSpot, up from the 19-contact first successful run — achieved by cycling the proven Company Search → Fit Score → Contacts → Email Waterfall → HubSpot loop across multiple company pools within the final trial window, rather than a single one-shot batch.
+
+**Geography rotation results, tested systematically across the sprint:**
+
+- **Winning combination: India, UK, UAE, Germany, Italy** — Germany initially scored near-zero when tested broadly (appliances/HVAC only), but recovered strongly (48/50 above threshold) once narrowed to include the furniture category specifically — root cause was a stale Fit Score prompt that only rewarded India/UK/UAE on Geographic Fit and hadn't been updated when Germany was added to Company Search. Fixed by updating the rubric; Italy was added on the same proven furniture-narrowed filter set and also converted well ("decent" hit rate), without needing a separate diagnostic cycle.
+- **US and Mexico excluded throughout** — steep current tariffs on steel/aluminum-heavy exports (US: 50% Section 232; Mexico: up to 50% on flat steel specifically), researched and decided early in the BDE-data phase.
+- **EU-broad (Germany + Italy together, appliances/HVAC only, no furniture) underperformed badly** — abandoned rather than debugged further, given the furniture-narrowed version was already proven to work; not worth the time to diagnose why the broad version failed once a working alternative existed.
+- **Vietnam/Thailand/ASEAN researched but deliberately not pursued** — genuinely large metal-furniture export market ($1.8B from Vietnam alone), but flagged as high-risk: regional manufacturing base skews toward OEM/ODM production and forging/foundry capability, resembling the same supply-side risk profile that caused the Industrial Machinery dead end below. Not worth testing this late in the sprint without time to diagnose a possible repeat failure.
+
+**Industry rotation results:**
+
+- **Furniture and Home Furnishings Manufacturing** — the standout performer of the entire session (30/50 in its first dedicated test), likely because the category maps more cleanly to genuine buyers (steel-framed chairs/desks/cabinets) than some other tags.
+- **Industrial Machinery Manufacturing (retried with a mature exclusion list)** — confirmed dead end, 0/50 above threshold, with every scored row correctly flagged `isCompetitorOrSupplier: true`. Root cause: this Clay industry tag captures machinery/equipment _makers_ (Atharva's supply side — presses, tooling, forging equipment) rather than machinery _buyers_. The BDE's stated interest in "Industrial Equipment" as a growth category should be pursued via a different search approach (e.g., explicit buyer-side keyword targeting) if revisited, not this industry tag.
+
+**Process-level finding:** narrowing Estimated Employee Count (150-1,000 vs. the proven 150-5,000) correlated with a severe hit-rate drop (11/227, ~5%) in an isolated test — attributed to the Fit Score prompt's "score conservatively when research is inconclusive" rule interacting badly with smaller, less-documented companies, not a genuine fit problem. Reverted and not retested narrow again.
+
+**Time allocation, final sprint:** once Clay's trial credit-expiry timeline became known (5 days, later 16 hours), strategy shifted explicitly from credit-conservation to time-conservation — actual usage data confirmed credits were never the binding constraint (a full ~50-row cycle cost roughly 100-200 credits against a 2,000-credit balance), so all remaining effort was directed at maximizing manual-review speed (mechanical Fit Score cutoffs, no line-by-line company review, Find Contacts capped at 1 result) rather than credit efficiency.
+
+## 2026-09-03 — Sprint closes at 126 contacts: final rotation results, v1 pipeline complete
+
+**Final milestone:** 126 total contacts pushed to HubSpot by the end of the Clay trial window — up from 19 (first successful end-to-end run) to 82 (mid-sprint checkpoint) to 126 (final). Closes out the BDE-data scaling sprint and, with it, v1 of the GTM automation pipeline as a complete, portfolio-ready artifact: real intake data, real enrichment, real (if AI-scored) prospects, real CRM records.
+
+**Automotive, revisited late and confirmed viable.** Originally deprioritized early in the BDE-data phase on the strength of the 1% revenue signal alone, without an actual conversion test. Retested this session with a mature exclusion list and converted well — confirms the earlier deprioritization was a reasonable caution given the data available at the time, but not a permanently correct call. Worth remembering as a general lesson: a category deprioritized on indirect signal (revenue share) may still be worth a direct test once the tooling (exclusion keywords, Fit Score prompt) has matured past its earlier state.
+
+**South Korea tested twice, failed both times — a genuine, confirmed negative result, not noise.** First against the general appliances/HVAC/furniture set (near-zero), then paired specifically with automotive on the theory that Korea's strength is auto manufacturing (2 companies only). Two failures across two different category pairings is stronger evidence than one, and was treated as sufficient to drop the market entirely rather than testing a third combination.
+
+**Considered but explicitly declined: a combined automotive + appliances/HVAC/furniture search**, on the reasoning that both underlying searches had already been run to full backfill exhaustion independently — a combined search would only surface genuine new leads from the narrow cross-category overlap (e.g., a company like Trans ACNR, which is both automotive and HVAC-relevant), not from re-covering already-searched ground. Judged not worth the setup time this late in the sprint; flagged as a legitimate but low-yield tactic if ever revisited.
+
+**Aerospace & Defense was considered but deliberately excluded from the entire final sprint**, despite being one of the BDE's named growth-interest industries — Atharva does not hold AS9100/NADCAP certification, so aerospace leads represent a genuine capability gap, not just an unproven category. This is a different kind of risk than the geography/industry mismatches encountered elsewhere (wrong companies surfacing vs. right companies Atharva can't actually serve) and was judged not worth pursuing without a real certification plan in place.
+
+**What v1 represents, for the portfolio record:** a working pipeline spanning 4 intake forms, Airtable, Clay (Company Search, structured-output Fit Scoring with a competitor-exclusion safeguard, contact discovery, email waterfall enrichment, news-based opportunity signals), n8n (LLM-personalized outreach, dual-path HubSpot upsert logic for both email and no-email contacts), and HubSpot (Company/Contact/Note records) — built, debugged, and scaled entirely within real constraints: a hard trial deadline, genuine data-quality problems (entity disambiguation, location errors, industry miscategorization), and a series of honestly-diagnosed dead ends (job postings, Industrial Machinery, South Korea, broad EU) alongside the wins.
+
+## 2026-09-03 — v1 declared complete
+
+**Decision:** Marking this project as v1-complete. Every planned pipeline stage is built, tested, and has processed real data end-to-end: 4 intake forms → Airtable → Clay enrichment (search, scoring, contacts, email, news signals) → n8n (personalization, dual-path CRM upsert) → HubSpot. 126 real prospect contacts, across 5 countries and 4 industries, are live in HubSpot as the tangible output.
+
+**Why this is a legitimate v1, not a demo:** the pipeline was tested against two genuinely different conditions — a mechanical, dummy-data build phase to prove the architecture, and a full production run against real BDE-supplied business data at meaningful scale (126 contacts, not a handful of test rows). Every component has been broken and fixed at least once under real conditions (JSON escaping across three separate nodes, a HubSpot API version mismatch, a Clay-side timeout traced to two specific payload fields, an entity-disambiguation problem affecting multi-division companies, an industry category that looked plausible but was structurally wrong for the business). None of these were theoretical risks — all were hit, diagnosed, and resolved with evidence, not guesswork, consistent with the verification discipline established from Day 1.
+
+**What "v1" deliberately does not include, and why that's fine:** the opportunity-signal → personalization linkage (built, tested independently, but disconnected before the final production run after being identified as the cause of a Clay-side timeout, with root cause not fully diagnosed under time pressure); RFQ/tender monitoring (researched and found structurally infeasible — private OEM sourcing isn't publicly listed); a feedback loop from real outreach outcomes back into scoring (never started). These are honest, logged scope boundaries — a v1 with clear, documented edges is a stronger artifact than an over-scoped project with hidden gaps.
+
+**Documentation state at v1 close:** `decisions.md` now contains a complete, chronological record from initial infra decisions (2026-08-16) through the final scaling sprint (2026-09-03) — every major pivot, bug, and dead end included, not just the successful path. README updated to reflect actual final architecture and results rather than the in-progress plan it described at project start.
