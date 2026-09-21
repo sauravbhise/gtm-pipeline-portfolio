@@ -1,0 +1,28 @@
+info:
+  name: Add Contact
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: https://goldmine-plating-negligee.ngrok-free.dev/webhook/fce82f8f-8d23-48ab-90d1-28c263c81515
+  body:
+    type: json
+    data: |-
+      {
+        "company_name": "Mitsubishi Electric India Pvt. Ltd.",
+        "domain": "mitsubishielectric.in",
+        "fit_score": "92",
+        "fit_rationale": "Mitsubishi Electric India operates multiple confirmed manufacturing facilities in the Pune area (Bhosari, Talegaon) alongside a brand-new ₹2,100 crore AC and compressor manufacturing plant in Chennai, inaugurated February 2026 — a major, current expansion explicitly aimed at import substitution and building a self-reliant HVAC manufacturing ecosystem in India. Multiple Pune-area sites represent a genuine proximity advantage to Atharva's own flagship facility.",
+        "company_description": "Mitsubishi Electric India Pvt. Ltd. is a subsidiary of Mitsubishi Electric Corporation, manufacturing air conditioners, factory automation systems, elevators and escalators, railway products, and semiconductors across multiple Indian facilities. Its AC and compressor manufacturing spans existing Pune-area operations and a newly inaugurated Chennai facility (2026), part of a broader localization strategy to reduce import dependence in India's HVAC sector.",
+        "contact_name": "Rakesh Dhankhar",
+        "contact_title": "Procurement Lead, AC and Compressor Plant",
+        "contact_linkedin": "https://www.linkedin.com/in/rakesh-dhankhar-0a325517/"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

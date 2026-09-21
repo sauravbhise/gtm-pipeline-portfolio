@@ -6,7 +6,7 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 
 ## 2026-08-16 — Capstone project selection
 
-**Decision:** Build the GTM/AI automation capstone for my father's sheet-metal stamping business, instead of a generic/fictional SaaS demo.
+**Decision:** Build the GTM/AI automation capstone for Atharva Metals & Engineering, a sheet-metal stamping manufacturer, instead of a generic/fictional SaaS demo.
 
 **Why:** Real stakeholder, real constraints, real outcome — a stronger story for job interviews and MBA essays than a synthetic demo. Manufacturing GTM is also a genuine niche few candidates in this space have touched.
 
@@ -53,7 +53,6 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 **Decision:** Free-tier cloud VM (always-on), not Cloudflare Tunnel or ngrok.
 
 **Alternatives considered:**
-
 - Cloudflare Tunnel — free, no port-forwarding, but requires my laptop to stay on and running
 - ngrok/localtunnel — fast but rotating URLs on free tier, unsuitable for sharing with a non-technical recipient over several days
 
@@ -90,7 +89,6 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 **Decision:** Attempt Oracle Cloud "Always Free" ARM tier first, time-boxed to ~1 day of provisioning attempts (including retrying regions if "out of capacity" errors occur). Fallback to GCP's e2-micro (also free-forever) if Oracle isn't resolved in that window.
 
 **Alternatives considered:**
-
 - **GCP e2-micro** — reliable signup, no capacity roulette, but only ~1GB RAM (tight for future growth)
 - **AWS / Azure** — free tier is a 12-month window only, then bills at standard rates; wrong shape for a "forever free" build
 - **Hetzner** — not free, but ~$5/mo removes every free-tier caveat; kept as a mental fallback if both free options fail
@@ -102,7 +100,7 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 
 ## 2026-08-16 — Build-in-public timing
 
-**Decision:** Log progress privately (not published) for now. Revisit going public in 3–4 weeks once there's real, demoable progress — and once it's clear what needs anonymizing given this touches a real family business.
+**Decision:** Log progress privately (not published) for now. Revisit going public in 3–4 weeks once there's real, demoable progress — and once it's clear what needs anonymizing given this touches a real, willing partner business's operational data.
 
 **Why:** Currently employed full-time; premature public posting about a career pivot risks unwanted attention at the current job. Also need to think through what's safe to share publicly about a real company's operations before anything goes live. The habit (private logging) is what compounds — audience can be added later without cost.
 
@@ -113,12 +111,11 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 **Decision:** Abandoned Oracle Cloud "Always Free" after three separate, unrelated failures during signup/provisioning; moved to GCP's e2-micro (also free-forever) instead.
 
 **What happened, in order:**
-
 1. **Billing-address verification failure** — Oracle repeatedly rejected a billing address that matched the card issuer's records exactly, a known and commonly-reported issue with no reliable single fix (tried reformatting state name, disabling autofill — didn't resolve it).
 2. **Client-side signup bug** — after resolving the billing prompt, the "Start My Trial" flow hung on a spinner; network logs showed a CORS error and a blocked request (`ora_code.js`) on Oracle's own signup script, unrelated to anything on my end.
 3. **Known capacity risk, never even reached** — researched best-odds regions (Singapore, Frankfurt) in case provisioning itself also failed, but didn't get that far given the above.
 
-**Why give up rather than push through:** The original case for Oracle was more RAM/OCPU headroom (2 OCPU/12GB vs GCP's ~1GB) in exchange for accepting more setup friction as a deliberate skill-building tradeoff (see 2026-08-16 VM provider entry). That tradeoff assumed the friction would be _capacity-related_ — a known, bounded risk we'd already planned around. Instead the failures were pre-provisioning, on Oracle's own signup infrastructure, with no clear resolution path and no way to know if a fourth attempt would succeed. Continuing to debug someone else's broken signup flow stopped being "infra-ownership skill-building" and became pure sunk-cost risk with no learning value. GCP was the pre-agreed fallback for exactly this scenario (see 2026-08-16 provider selection entry) — used as intended rather than reactively.
+**Why give up rather than push through:** The original case for Oracle was more RAM/OCPU headroom (2 OCPU/12GB vs GCP's ~1GB) in exchange for accepting more setup friction as a deliberate skill-building tradeoff (see 2026-08-16 VM provider entry). That tradeoff assumed the friction would be *capacity-related* — a known, bounded risk we'd already planned around. Instead the failures were pre-provisioning, on Oracle's own signup infrastructure, with no clear resolution path and no way to know if a fourth attempt would succeed. Continuing to debug someone else's broken signup flow stopped being "infra-ownership skill-building" and became pure sunk-cost risk with no learning value. GCP was the pre-agreed fallback for exactly this scenario (see 2026-08-16 provider selection entry) — used as intended rather than reactively.
 
 **Outcome:** GCP e2-micro provisioned successfully via Terraform (see `infra/`) on first attempt, `us-central1-c`, no capacity or billing issues encountered.
 
@@ -139,7 +136,6 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 **Decision:** Added `Company Name` via a Set/Edit-Fields node hardcoded in each n8n workflow (after the Form Trigger, before Airtable), rather than as a form field (visible or hidden) filled in by the respondent.
 
 **Alternatives considered:**
-
 - Visible text field, retyped by the respondent on each chapter — real risk of inconsistent spelling ("Atharva Metals" vs "Atharva Metals & Engineering") breaking the Airtable match/upsert logic across chapters
 - Hidden field pre-filled via URL query parameter, auto-carried between chapters — more "dynamic," reusable across companies without editing the workflow, but requires either manually constructing correct URLs each time or building an auto-generate-next-link step
 
@@ -219,9 +215,9 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 
 **Decision:** Locked the full Clay-side enrichment chain for the prospecting table: Company Search (ICP-filtered) → AI Fit Score → Find Contacts at Company → Email Waterfall. All four stages tested on a small sample before running across the full list, consistent with the testing discipline used throughout the project.
 
-**Fit Score:** Built as a Clay AI column using GPT-4.1 mini (lowest-cost option at 1 credit/row). Tested against known strong/weak fits (Hindware, Carrier Midea vs. Mivi, PEI-Genesis) before trusting it — confirmed real score discrimination (30-93 range) rather than a model defaulting to a safe middle score. Prompt built from a factual Atharva capability description (materials, tonnage, certifications, current customers) plus the "strategic growth partner" framing surfaced from real BDE intake answers ("when he grows, we grow") — this reframing came _after_ initial scoring and is a documented follow-up, not yet re-run into the scores as of this entry.
+**Fit Score:** Built as a Clay AI column using GPT-4.1 mini (lowest-cost option at 1 credit/row). Tested against known strong/weak fits (Hindware, Carrier Midea vs. Mivi, PEI-Genesis) before trusting it — confirmed real score discrimination (30-93 range) rather than a model defaulting to a safe middle score. Prompt built from a factual Atharva capability description (materials, tonnage, certifications, current customers) plus the "strategic growth partner" framing surfaced from real BDE intake answers ("when he grows, we grow") — this reframing came *after* initial scoring and is a documented follow-up, not yet re-run into the scores as of this entry.
 
-**Find Contacts at Company:** Originally attempted via Apollo (logged separately, 2026-08-24), hit a paid-tier API wall, pivoted to Clay's own native action. Configured against the 7-persona title/seniority/department filter set developed collaboratively (Procurement, Sourcing/Supply Chain, Operations Director, Plant Head, VP/Head of Manufacturing, Quality Assurance, Design Engineering/NPD) — the Engineering-track persona was added specifically after the BDE's real answer that Procurement _and_ Engineering jointly own the final decision, correcting an initial persona set that under-weighted Engineering.
+**Find Contacts at Company:** Originally attempted via Apollo (logged separately, 2026-08-24), hit a paid-tier API wall, pivoted to Clay's own native action. Configured against the 7-persona title/seniority/department filter set developed collaboratively (Procurement, Sourcing/Supply Chain, Operations Director, Plant Head, VP/Head of Manufacturing, Quality Assurance, Design Engineering/NPD) — the Engineering-track persona was added specifically after the BDE's real answer that Procurement *and* Engineering jointly own the final decision, correcting an initial persona set that under-weighted Engineering.
 
 **Email Waterfall:** 3-provider chain — Findymail (highest accuracy, first position) → Prospeo/Datagma (second) → Hunter (broadest net, final fallback) — deliberately avoiding another BYOK/separate-account dependency after the Apollo lesson; all three run on Clay's native credit balance. Order followed the general "cost control via early cheap/high-coverage provider" principle rather than a fixed accuracy-only ranking, since a full waterfall's cost is dominated by how many rows survive to the more expensive later steps, not the sticker price of any one provider.
 
@@ -238,11 +234,10 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 **Why:** Consistent with the testing discipline used throughout the project (dummy form submissions before trusting Airtable writes, 2-3 row tests before full runs on every Clay column) — build and confirm the mechanical pipeline works first, then verify it holds up against better inputs, rather than blocking forward progress on a data refresh that doesn't change the pipeline's structure.
 
 **Known costs of this approach, accepted deliberately:**
-
 - LLM personalization API calls (Claude/OpenAI) are pay-per-token, unlike Clay's pooled credit model — building and testing the Outreach Angle step now means paying for those calls twice (once now, once after the Fit Score refresh). Judged acceptable at ~11 rows.
 - The shortlist membership may shift once Fit Score is re-run with the growth-partner framing and any BDE-corrected facts — work already done downstream (contacts, emails, draft outreach) for a company that later falls out of the ≥80 threshold becomes throwaway. Acceptable for a capstone/demo; would need real thought before treating this pattern as production-safe with real spend at stake.
 
-**Requirement this places on the HubSpot sync design:** must use a stable match key (company domain, mirroring the `Company Name` match-key pattern already used for Airtable) so the eventual BDE-informed re-run _updates_ existing HubSpot records via upsert rather than creating duplicates. Building this correctly on the first pass, not deferring it — a re-run that creates duplicate CRM records would undermine the entire point of treating the second pass as validation rather than a fresh start.
+**Requirement this places on the HubSpot sync design:** must use a stable match key (company domain, mirroring the `Company Name` match-key pattern already used for Airtable) so the eventual BDE-informed re-run *updates* existing HubSpot records via upsert rather than creating duplicates. Building this correctly on the first pass, not deferring it — a re-run that creates duplicate CRM records would undermine the entire point of treating the second pass as validation rather than a fresh start.
 
 **Framing for the portfolio:** the two-pass approach is being treated as a feature to highlight, not a shortcut to hide — demonstrating the pipeline correctly handling a real data refresh (clean upsert, no duplicates, shortlist re-evaluation) is a stronger capstone story than a single clean run would be.
 
@@ -376,21 +371,21 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 
 ---
 
+
+
 ## 2026-09-03 — Scaling sprint: 82 contacts pushed to HubSpot; geography rotation findings
 
 **Milestone:** 82 total contacts processed through the full pipeline and pushed to HubSpot, up from the 19-contact first successful run — achieved by cycling the proven Company Search → Fit Score → Contacts → Email Waterfall → HubSpot loop across multiple company pools within the final trial window, rather than a single one-shot batch.
 
 **Geography rotation results, tested systematically across the sprint:**
-
 - **Winning combination: India, UK, UAE, Germany, Italy** — Germany initially scored near-zero when tested broadly (appliances/HVAC only), but recovered strongly (48/50 above threshold) once narrowed to include the furniture category specifically — root cause was a stale Fit Score prompt that only rewarded India/UK/UAE on Geographic Fit and hadn't been updated when Germany was added to Company Search. Fixed by updating the rubric; Italy was added on the same proven furniture-narrowed filter set and also converted well ("decent" hit rate), without needing a separate diagnostic cycle.
 - **US and Mexico excluded throughout** — steep current tariffs on steel/aluminum-heavy exports (US: 50% Section 232; Mexico: up to 50% on flat steel specifically), researched and decided early in the BDE-data phase.
 - **EU-broad (Germany + Italy together, appliances/HVAC only, no furniture) underperformed badly** — abandoned rather than debugged further, given the furniture-narrowed version was already proven to work; not worth the time to diagnose why the broad version failed once a working alternative existed.
 - **Vietnam/Thailand/ASEAN researched but deliberately not pursued** — genuinely large metal-furniture export market ($1.8B from Vietnam alone), but flagged as high-risk: regional manufacturing base skews toward OEM/ODM production and forging/foundry capability, resembling the same supply-side risk profile that caused the Industrial Machinery dead end below. Not worth testing this late in the sprint without time to diagnose a possible repeat failure.
 
 **Industry rotation results:**
-
 - **Furniture and Home Furnishings Manufacturing** — the standout performer of the entire session (30/50 in its first dedicated test), likely because the category maps more cleanly to genuine buyers (steel-framed chairs/desks/cabinets) than some other tags.
-- **Industrial Machinery Manufacturing (retried with a mature exclusion list)** — confirmed dead end, 0/50 above threshold, with every scored row correctly flagged `isCompetitorOrSupplier: true`. Root cause: this Clay industry tag captures machinery/equipment _makers_ (Atharva's supply side — presses, tooling, forging equipment) rather than machinery _buyers_. The BDE's stated interest in "Industrial Equipment" as a growth category should be pursued via a different search approach (e.g., explicit buyer-side keyword targeting) if revisited, not this industry tag.
+- **Industrial Machinery Manufacturing (retried with a mature exclusion list)** — confirmed dead end, 0/50 above threshold, with every scored row correctly flagged `isCompetitorOrSupplier: true`. Root cause: this Clay industry tag captures machinery/equipment *makers* (Atharva's supply side — presses, tooling, forging equipment) rather than machinery *buyers*. The BDE's stated interest in "Industrial Equipment" as a growth category should be pursued via a different search approach (e.g., explicit buyer-side keyword targeting) if revisited, not this industry tag.
 
 **Process-level finding:** narrowing Estimated Employee Count (150-1,000 vs. the proven 150-5,000) correlated with a severe hit-rate drop (11/227, ~5%) in an isolated test — attributed to the Fit Score prompt's "score conservatively when research is inconclusive" rule interacting badly with smaller, less-documented companies, not a genuine fit problem. Reverted and not retested narrow again.
 
@@ -419,3 +414,39 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 **What "v1" deliberately does not include, and why that's fine:** the opportunity-signal → personalization linkage (built, tested independently, but disconnected before the final production run after being identified as the cause of a Clay-side timeout, with root cause not fully diagnosed under time pressure); RFQ/tender monitoring (researched and found structurally infeasible — private OEM sourcing isn't publicly listed); a feedback loop from real outreach outcomes back into scoring (never started). These are honest, logged scope boundaries — a v1 with clear, documented edges is a stronger artifact than an over-scoped project with hidden gaps.
 
 **Documentation state at v1 close:** `decisions.md` now contains a complete, chronological record from initial infra decisions (2026-08-16) through the final scaling sprint (2026-09-03) — every major pivot, bug, and dead end included, not just the successful path. README updated to reflect actual final architecture and results rather than the in-progress plan it described at project start.
+
+## 2026-09-05 — Phase 2 begins: manual outreach craft, deliberately separate from the automated pipeline
+
+**Decision:** With v1 (the technical pipeline) complete and 126 contacts sitting in HubSpot, opened a distinct second phase focused on the actual outreach — sales craft, not automation — before any messages are sent. Explicitly framed as demonstrating a different, complementary skill set: v1 proved GTM engineering (build a system that finds and scores prospects); this phase proves GTM/sales judgment (know what actually makes a stranger respond to a cold message), both relevant to the dual audience of GTM/Applied AI employers and MBA admissions.
+
+**Trigger:** A manual review of drafted outreach Notes surfaced two real quality problems the automated pipeline couldn't have caught on its own: (1) two confirmed factual hallucinations (a fabricated "multimedia hardware supply chain" reference for Renault-Nissan-Mitsubishi, a fabricated "energy plant" reference for IVECO — both traced to thin `company_description` inputs), and (2) a structural gap — Atharva's own plant locations were never included in the personalization system prompt, so even a high-scoring geographic match (LG's Ranjangaon plant sitting at the same location as Atharva's flagship plant) went completely unmentioned in 126 auto-generated messages. Both findings reinforced that mechanically-scaled AI personalization has a real quality ceiling that manual craft can exceed for the highest-value accounts.
+
+**Approach: tiered effort, not uniform automation.** Rather than fixing the prompt and re-running all 126, the plan splits effort: a hand-curated pilot batch of ~20 companies gets manually researched, hook-tagged, and hand-crafted messaging; the remaining ~100+ stay AI-drafted with a lighter accuracy pass. This mirrors real account-based marketing practice (not every prospect deserves equal investment) and turns the pilot into a genuine, measurable test — comparing which personalization "hook types" actually drive replies, not just confirming that hand-written beats generic.
+
+**New data structure: `Personalization Hook Type` + `Personalization Hook Detail` on Company records**, added specifically to support later analysis (which hook types convert) and to make it easy to re-feed a hand-identified hook back into the automated pipeline via curl if useful. Ten hook categories defined from patterns found across the real company set (Plant Proximity, Dedicated Capacity Precedent, Trade Agreement Timing, Named Customer/Category Match, PLI Scheme Beneficiary, Certification Match, Known History/Re-engagement, Growth-Stage Signal, Verified News Signal, Other/Generic) — deliberately left open-ended via the "Other" category rather than treated as an exhaustive fixed list, since real research keeps surfacing genuinely new angles (e.g., LG's live, in-progress third-plant construction, which is simultaneously a Growth-Stage Signal and reinforces the Plant Proximity hook).
+
+**Guardrail established: no hook goes out without verification.** The "Known History / Re-engagement" category specifically (the IFB/Savera Pressing story) was flagged as unsafe to use until the actual BD lead confirms which contact, if any, has direct knowledge of that history — using unverified institutional memory in outreach risks confusing or exposing internal information to the wrong person. This same discipline (verify before using a "clever" fact) applies to every hook type, not just this one.
+
+**Also blocked on, separately:** sending itself is on hold pending `bd@atharvametals.com` credentials being available to whoever will actually send — this outreach-craft phase is deliberately being used as productive time during that wait, not blocked by it.
+
+## 2026-09-05 — Removed build-log.md
+
+**Decision:** Deleted `docs/build-log.md`. Its stated purpose (raw daily notes seeding future "build in public" posts) was never used past the 2026-08-16 kickoff entry — public posting was deferred that same day and never resumed, and `decisions.md` ended up serving as the actual working record at a more useful level of detail. Keeping a visibly abandoned file in the repo implied ongoing maintenance that wasn't happening; removing it is more honest than leaving it stale. README updated to remove the now-dead reference.
+
+## 2026-09-09 — Phase 2 closes: manual hook-tagging complete, 6 more Fit Score errors caught, creative outreach concepts scoped
+
+**Milestone:** Completed a full manual research and personalization-hook-tagging pass across the pilot batch. 20 companies received real, individually-researched hooks (LG, Voltas, IFB, Western Refrigeration, Marc Enterprises, Whirlpool, Daikin, Surya Roshni, Carrier Midea, EPACK Durable, Panasonic India, Sujata, Dimplex UK, Havells, Foster Refrigerator, Mitsubishi Electric India, Toyota Motor Manufacturing France, Škoda Auto Volkswagen India, Renault Nissan RNAIPL, Tata Motors Commercial Vehicles) — hitting the original ~20-company pilot target set at the start of Phase 2.
+
+**Six more companies caught and removed as genuine Fit Score errors, on top of the earlier ELTEK/Stelmec catches:** Rane Madras, HL Mando Anand, and Montra Electric were all confirmed Tier-1 automotive component suppliers (steering, suspension, brake systems) that should have triggered the `isCompetitorOrSupplier` exclusion — the same category-mismatch pattern first identified with Delta Electronics and Industrial Machinery, now confirmed recurring specifically within the automotive search rotation. Montra Electric additionally revealed a more specific risk worth naming as its own pattern: its parent group (Tube Investments of India) owns a sister division, TI Metal Forming, that already does deep-drawn stamping and chassis fabrication in-house — an existing captive-supplier relationship, not just a future "backward integration" risk. I.EVO was dropped on a different basis: an unresolved, unreconciled data discrepancy (company-claimed 5,000+ employees vs. third-party data showing 124 with a 42% YoY decline) made it impossible to write confident, accurate outreach regardless of category fit.
+
+**Total Fit Score corrections from this phase: ELTEK Group and Stelmec Limited** were confirmed via direct research (not just suspicion) to be supplier-side businesses that scored well above the 70 cutoff and have been deleted from HubSpot — a real, evidence-backed correction to the automated scoring system, distinct from a judgment call. Combined with the four automotive-round drops above, six companies total were removed post-hoc during Phase 2 that the Fit Score prompt should have excluded automatically.
+
+**Two hallucinations from the original 126-contact batch were traced and corrected with real research rather than just flagged and discarded:** the Renault-Nissan-Mitsubishi note's fabricated "multimedia hardware supply chain" reference was replaced with the real, current story (Renault's 2025-26 buyout of Nissan's stake, plant underutilization, and a stated €2B India export target by 2030). The IVECO "energy plant" fabrication was not re-researched in this pass and remains an open item if that company is pursued further.
+
+**One critical sensitivity finding, worth calling out as a standing rule:** Dimplex UK's contact (Anthea Mallon) is based in Magheralin, Northern Ireland — the exact region where parent company Glen Dimplex has been closing sites and cutting ~300 jobs. The correct, safe growth signal (a new Buckley, Wales facility) was substituted instead. Generalized as a standing check: **always verify whether negative company news geographically overlaps with where the actual contact is based**, not just whether the news itself is negative in the abstract — a company-level negative/positive split can still be locally sensitive to one specific person.
+
+**New personalization hook categories validated in practice, beyond the original 10:** Dedicated Capacity Precedent (referencing Atharva's own Vasai/Bavla plants built for Blue Star/Versuni) proved to be one of the strongest-performing categories once applied retroactively across LG, Voltas, IFB, Havells, and others — a genuine miss in the original hook-type list that required a dedicated retroactive pass to fix. A systematic "Other" category check, run twice across the full company set, surfaced two more real, non-obvious signals after the fact (LG's pending IPO, Western Refrigeration's Japanese parent ownership via Hoshizaki) — validating that a deliberate "does this need its own category" check catches things pattern-matching to a fixed list misses.
+
+**Creative outreach concepts scoped, not yet built:** to move beyond templated email personalization, discussed (1) using confirmed Plant Proximity hooks as a concrete plant-visit invitation rather than a passing mention, (2) LinkedIn connection requests as a warm touch before the email lands, (3) one-page account-specific micro-briefs for the top 5-6 companies, and (4) trigger-timed messaging framed as a timely congratulations for companies with genuinely recent news (Whirlpool's July 2026 inauguration, Havells' new refrigerator plant). None built yet — logged as the next concrete step once sending credentials are available.
+
+**Still blocked, unchanged:** sending requires `bd@atharvametals.com` access, not yet available. This entire phase was productive use of that waiting period, not blocked by it.
