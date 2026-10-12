@@ -611,3 +611,30 @@ Running record of key decisions and tradeoffs made on this project, and why. Kep
 - Dimplex UK and Toyota remain held pending verified procurement contacts, and Renault Nissan is skipped.
 - Confirm the signature placeholder is filled in on sent emails. The test copy still carried it.
 - The capability document gives revenue as ₹18 crore (FY19-20) to ₹106 crore (FY25-26, projected). The company website shows $10M for FY25-26 and $17.1M projected for FY26-27. FY25-26 ended in March 2026, so confirm the actual figure and update the label.
+
+## 2026-10-12 — Cohort shortlist: two large accounts and the first mid-size lock
+
+**Decision.** Large accounts: Carrier Midea (plant at Supa, confirmed by the user) and Godrej Appliances (Shirwal). Mid-size: EKA Mobility locked. Kinetic Engineering and Schmersal India go into a low-effort "check if our services are needed" group, because they are small and close but show no evidence of sheet-metal demand.
+
+**Excluded and why.**
+- Atomberg and Jabil: already customers.
+- Racold: its Chakan plant closed in 2018 (termination letters 31 Oct 2018), so it was removed after the first dossier wrongly listed it as operating.
+- Spacewood: only plant is in Nagpur.
+- Bajaj Electricals: plant runs, but the consumer segment lost money in FY26 (revenue down 12.2%, EBIT loss ₹49 cr) and capex is being cut to under half, so new-tooling programmes are unlikely soon.
+- Schindler India: evidence was closer than first judged (visible sourcing roles at Chakan) but weaker on growth and product match.
+
+**Why Godrej over Schindler.** Godrej is growing and sits in white goods, which is 80% of Atharva's revenue; Schindler has a lower-volume profile but no India-specific growth evidence. All accounts are cold approaches: the user has no warm introductions anywhere, so the choice rested on which company has a stated reason to take on a new supplier.
+
+**Evidence rule adopted.** A company enters the cohort only with a 2026 source showing the Pune-belt site is running, or the user's direct confirmation. Demand for sheet-metal parts is otherwise inferred and marked as inference.
+
+**Open.** Five mid-size slots. Candidates with 2026 evidence: Geon, AmpereHour Energy, Replus Engitech, Octillion. DCNT Global and Forsee Power have no 2026 evidence yet. Contact mapping (about three per account, verified Pune-area on LinkedIn) starts once the accounts are final.
+
+## 2026-10-12 — Cohort widened to nine full accounts plus three fit-checks
+
+**Decision.** Mid-size group is seven: EKA Mobility (locked), Geon, AmpereHour Energy, Replus Engitech, Octillion, Forsee Power India and DCNT Global. Large group stays two: Carrier Midea and Godrej Appliances. The fit-check group (one low-effort approach each, no deep work) is Kinetic Engineering, Schmersal India and Schindler India.
+
+**Reasoning (user's).** Adding a sixth mid-size candidate costs little, and DCNT and Forsee resemble the other battery and storage names, so the same message and research carry over.
+
+**Known gap.** DCNT and Forsee have no 2026 evidence of an operating Pune-belt plant; the first mapping step for each is to confirm the site is active (headcount, hiring, news) before any outreach.
+
+**Effort check.** Nine full accounts at about three contacts each is about 27 contacts, which sits at the top of the 24 to 30 the weekly budget supports, before the fit-check group. The 15 October rule still applies: if mapping lags, cut to six full accounts.
